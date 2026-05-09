@@ -4,6 +4,7 @@ module.exports = {
     ignorePatterns: ["dist", "build", "node_modules"],
     rules: {
         "no-console": ["error", { allow: ["warn", "error"] }],
+        "@typescript-eslint/naming-convention": "off",
     },
     overrides: [
         {

@@ -9,7 +9,7 @@
     "url": "git+https://github.com/a-omi-io/color.git",
     "directory": "packages/color-core"
   },
-  "sideEffect": false,
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
@@ -21,10 +21,17 @@
     "clean": "omi-io-pkg clean",
     "build": "yarn clean && omi-io-pkg build && tsc && omi-io-pkg alias",
     "test": "jest",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@omi-io/pkg-scripts": "v2.5.0"
+    "@omi-io/pkg-scripts": "v2.5.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.11.30",
+    "eslint": "^8.57.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "typescript": "~5.4.3"
   },
   "exports": {
     ".": {

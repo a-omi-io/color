@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node,git,yarn,macos,windows,linux,dotenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,git,yarn,macos,windows,linux,dotenv
 
+### Local scratch (compare scripts, venvs — never commit) ###
+.local/
+
 ### dotenv ###
 .env
 .secrets
