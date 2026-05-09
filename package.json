@@ -1,6 +1,6 @@
 {
-  "name": "@omi-io/template",
-  "description": "Nx monorepo template for TypeScript libraries with Yarn, CI, and release workflows",
+  "name": "@omi-io/color",
+  "description": "Color library",
   "private": true,
   "engines": {
     "node": ">=20.0.0",

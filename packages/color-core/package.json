@@ -1,0 +1,37 @@
+{
+  "name": "@omi-io/color-core",
+  "scopeCommitName": "@:color-core",
+  "version": "0.0.1",
+  "description": "Color core library",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-omi-io/color.git",
+    "directory": "packages/color-core"
+  },
+  "sideEffect": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "scripts": {
+    "clean": "omi-io-pkg clean",
+    "build": "yarn clean && omi-io-pkg build && tsc && omi-io-pkg alias",
+    "test": "jest",
+    "lint": "eslint ./src"
+  },
+  "devDependencies": {
+    "@omi-io/pkg-scripts": "v2.5.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.js"
+    },
+    "./package.json": "./package.json"
+  }
+}

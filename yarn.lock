@@ -2745,19 +2745,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@omi-io/example-lib@workspace:packages/example-lib":
+"@omi-io/color-core@workspace:packages/color-core":
   version: 0.0.0-use.local
-  resolution: "@omi-io/example-lib@workspace:packages/example-lib"
+  resolution: "@omi-io/color-core@workspace:packages/color-core"
   dependencies:
-    "@omi-io/pkg-scripts": "npm:^2.5.0"
-    "@types/jest": "npm:^29.5.0"
-    jest: "npm:^29.5.0"
-    ts-jest: "npm:^29.0.5"
-    typescript: "npm:^5.4.3"
+    "@omi-io/pkg-scripts": "npm:v2.5.0"
   languageName: unknown
   linkType: soft
 
-"@omi-io/pkg-scripts@npm:^2.5.0, @omi-io/pkg-scripts@npm:v2.5.0":
+"@omi-io/pkg-scripts@npm:v2.5.0":
   version: 2.5.0
   resolution: "@omi-io/pkg-scripts@npm:2.5.0"
   dependencies:
