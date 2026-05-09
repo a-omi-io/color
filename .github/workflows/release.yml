@@ -1,0 +1,189 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - release/**
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release package from branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: yarn
+          registry-url: https://registry.npmjs.org
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Parse release branch
+        id: parse
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BRANCH="${GITHUB_REF_NAME}"
+          if [[ ! "${BRANCH}" =~ ^release/([^/]+)/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "Expected branch format: release/<pkg>/<x.y.z>"
+            echo "Actual branch: ${BRANCH}"
+            exit 1
+          fi
+
+          PKG="${BASH_REMATCH[1]}"
+          VERSION="${BASH_REMATCH[2]}"
+          PACKAGE_JSON_PATH="packages/${PKG}/package.json"
+
+          if [[ ! -f "${PACKAGE_JSON_PATH}" ]]; then
+            echo "Package manifest not found at: ${PACKAGE_JSON_PATH}"
+            exit 1
+          fi
+
+          PROJECT="$(node -p "require('./${PACKAGE_JSON_PATH}').name")"
+          if [[ -z "${PROJECT}" ]]; then
+            echo "Missing \"name\" in ${PACKAGE_JSON_PATH}"
+            exit 1
+          fi
+
+          if ! yarn nx show projects | grep -Fx "${PROJECT}" > /dev/null; then
+            echo "Nx project not found for package: ${PROJECT}"
+            echo "(expected root package.json \"name\" to match an Nx project id)"
+            exit 1
+          fi
+
+          SCOPE_COMMIT_NAME="$(node -p "const p=require('./${PACKAGE_JSON_PATH}'); p.scopeCommitName || p.name")"
+
+          echo "pkg=${PKG}" >> "${GITHUB_OUTPUT}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "project=${PROJECT}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${PROJECT}@${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "scope_commit_name=${SCOPE_COMMIT_NAME}" >> "${GITHUB_OUTPUT}"
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build package
+        run: yarn nx run-many -t build -p "${{ steps.parse.outputs.project }}"
+
+      - name: Sync package files for publish
+        run: yarn --cwd "packages/${{ steps.parse.outputs.pkg }}" omi-io-pkg sync-files
+
+      - name: Version package
+        run: yarn exec omi-io-pkg-release-with-config yarn nx release version "${{ steps.parse.outputs.version }}" --projects="${{ steps.parse.outputs.project }}"
+
+      - name: Generate changelog and GitHub release
+        if: ${{ env.ACT != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: yarn exec omi-io-pkg-release-with-config yarn nx release changelog "${{ steps.parse.outputs.version }}" --projects="${{ steps.parse.outputs.project }}"
+
+      - name: Generate changelog (dry-run for act)
+        if: ${{ env.ACT == 'true' }}
+        run: yarn exec omi-io-pkg-release-with-config yarn nx release changelog "${{ steps.parse.outputs.version }}" --projects="${{ steps.parse.outputs.project }}" --dry-run
+
+      - name: Commit release changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.parse.outputs.version }}"
+          COMMIT_MESSAGE="release(${{ steps.parse.outputs.scope_commit_name }}): v${VERSION}"
+
+          if [[ "${ACT:-}" == "true" ]]; then
+            echo "=== Release commit/tag debug ==="
+            echo "pkg=${{ steps.parse.outputs.pkg }}"
+            echo "project=${{ steps.parse.outputs.project }}"
+            echo "version=${{ steps.parse.outputs.version }}"
+            echo "scope_commit_name=${{ steps.parse.outputs.scope_commit_name }}"
+            echo "GITHUB_REF_NAME=${GITHUB_REF_NAME:-}"
+            echo "GITHUB_SHA=${GITHUB_SHA:-}"
+            echo "==============================="
+            # Prevent pager pauses in local act runs.
+            export GIT_PAGER=cat
+
+            echo "Working tree before add:"
+            git status --porcelain=v1 || true
+          fi
+
+          git add -A
+          # Stage only release outputs (not the whole repo — avoids act/local dirty files
+          # e.g. workflow edits from being committed with the release).
+          ## PKG="${{ steps.parse.outputs.pkg }}"
+          ## git add -A -- "packages/${PKG}/"
+          ## if [[ -f yarn.lock ]]; then
+          ##   git add -A -- yarn.lock
+          ## fi
+
+          if [[ "${ACT:-}" == "true" ]]; then
+            echo "Staged changes:"
+            git --no-pager diff --cached --name-status || true
+            git --no-pager diff --cached --stat || true
+          fi
+
+          if git diff --cached --quiet; then
+            echo "No staged changes to commit."
+          else
+            if [[ "${ACT:-}" == "true" ]]; then
+              echo "Commit message will be: ${COMMIT_MESSAGE}"
+            fi
+            git commit -m "${COMMIT_MESSAGE}"
+            if [[ "${ACT:-}" == "true" ]]; then
+              echo "Created commit: $(git rev-parse HEAD)"
+            fi
+          fi
+
+          if [[ "${ACT:-}" == "true" ]]; then
+            git show -s --decorate=full --oneline HEAD || true
+          fi
+
+      - name: Create annotated tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.parse.outputs.tag }}"
+          VERSION="${{ steps.parse.outputs.version }}"
+          COMMIT_MESSAGE="release(${{ steps.parse.outputs.scope_commit_name }}): v${VERSION}"
+
+          # Ensure tag is created at workflow level (independent from Nx internals).
+          if git ls-remote --tags --exit-code origin "refs/tags/${TAG}" > /dev/null 2>&1; then
+            echo "Tag ${TAG} already exists on origin. Skipping tag creation."
+          else
+            if git rev-parse -q --verify "refs/tags/${TAG}" > /dev/null; then
+              git tag -d "${TAG}"
+            fi
+            git tag -a "${TAG}" -m "${COMMIT_MESSAGE}" HEAD
+            echo "Created annotated tag: ${TAG}"
+          fi
+
+          if [[ "${ACT:-}" == "true" ]]; then
+            git show "${TAG}" --no-patch || true
+          fi
+
+      - name: Publish package
+        if: ${{ env.ACT != 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: ${{ env.ACT == 'true' && 'false' || 'true' }}
+        run: yarn nx release publish --projects="${{ steps.parse.outputs.project }}"
+
+      - name: Push release commit and tags to main
+        if: ${{ env.ACT != 'true' }}
+        run: git push --follow-tags origin HEAD:main

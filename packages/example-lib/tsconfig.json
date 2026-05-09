@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "./src",
+    "sourceMap": false,
+    "outDir": "./dist/types",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleDetection": "legacy",
+    "emitDeclarationOnly": true,
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "types": ["node", "jest"],
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": ["**/*.spec.ts", "**/*.spec.js"]
+}
