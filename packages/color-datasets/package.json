@@ -1,0 +1,65 @@
+{
+  "name": "@omi-io/color-datasets",
+  "scopeCommitName": "@:datasets",
+  "version": "0.0.1",
+  "description": "Curated reference data: standard illuminants and tristimulus tables, RGB colorspace definitions, transfer-function pairs, and chromatic-adaptation transforms.",
+  "keywords": [
+    "color",
+    "colorimetry",
+    "cie",
+    "illuminant",
+    "whitepoint",
+    "tristimulus",
+    "chromaticity",
+    "rgb-colorspace",
+    "colorspace",
+    "srgb",
+    "rec709",
+    "rec2020",
+    "transfer-function",
+    "gamma",
+    "linear-light",
+    "chromatic-adaptation"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-omi-io/color.git",
+    "directory": "packages/color-datasets"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "scripts": {
+    "clean": "omi-io-pkg clean",
+    "build": "yarn clean && omi-io-pkg build && tsc && omi-io-pkg alias",
+    "test": "jest",
+    "lint": "eslint ./src",
+    "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@omi-io/color-core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@omi-io/pkg-scripts": "v2.5.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.11.30",
+    "eslint": "^8.57.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "typescript": "~5.4.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.js"
+    },
+    "./package.json": "./package.json"
+  }
+}
