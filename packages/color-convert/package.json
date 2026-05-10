@@ -65,6 +65,16 @@
       "require": "./dist/cjs/index.cjs",
       "default": "./dist/esm/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./adaptation": {
+      "types": "./dist/types/adaptation/index.d.ts",
+      "require": "./dist/cjs/adaptation/index.cjs",
+      "default": "./dist/esm/adaptation/index.js"
+    },
+    "./conversions": {
+      "types": "./dist/types/conversions/index.d.ts",
+      "require": "./dist/cjs/conversions/index.cjs",
+      "default": "./dist/esm/conversions/index.js"
+    }
   }
 }

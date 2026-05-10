@@ -1,1 +1,2 @@
-export const name = "color-convert";
+export * from "./adaptation";
+export * from "./conversions";
