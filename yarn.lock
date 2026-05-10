@@ -2752,7 +2752,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@omi-io/color-core@workspace:packages/color-core":
+"@omi-io/color-core@npm:^0.1.0, @omi-io/color-core@workspace:packages/color-core":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-core@workspace:packages/color-core"
   dependencies:
@@ -2771,6 +2771,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omi-io/color-models@workspace:packages/color-models"
   dependencies:
+    "@omi-io/color-core": "npm:^0.1.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
