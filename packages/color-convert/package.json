@@ -1,0 +1,70 @@
+{
+  "name": "@omi-io/color-convert",
+  "scopeCommitName": "@:convert",
+  "version": "0.0.1",
+  "description": "Composable color space conversions, chromatic adaptation, and color-difference metrics built on core types and reference datasets.",
+  "keywords": [
+    "color",
+    "color-space",
+    "color-conversion",
+    "colorimetry",
+    "chromatic-adaptation",
+    "von-kries",
+    "delta-e",
+    "ciede2000",
+    "cie94",
+    "cie76",
+    "cmc",
+    "rgb",
+    "hsl",
+    "hsv",
+    "cmyk",
+    "xyz",
+    "lab",
+    "xyy",
+    "ycbcr"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-omi-io/color.git",
+    "directory": "packages/color-convert"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "scripts": {
+    "clean": "omi-io-pkg clean",
+    "build": "yarn clean && omi-io-pkg build && tsc && omi-io-pkg alias",
+    "test": "jest",
+    "lint": "eslint ./src",
+    "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@omi-io/color-core": "^0.1.0",
+    "@omi-io/color-datasets": "^0.1.0",
+    "@omi-io/color-models": "^0.1.0"
+  },
+  "devDependencies": {
+    "@omi-io/pkg-scripts": "v2.5.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.11.30",
+    "eslint": "^8.57.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "typescript": "~5.4.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.js"
+    },
+    "./package.json": "./package.json"
+  }
+}
