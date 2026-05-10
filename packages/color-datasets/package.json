@@ -60,6 +60,26 @@
       "require": "./dist/cjs/index.cjs",
       "default": "./dist/esm/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./illuminants": {
+      "types": "./dist/types/illuminants/index.d.ts",
+      "require": "./dist/cjs/illuminants/index.cjs",
+      "default": "./dist/esm/illuminants/index.js"
+    },
+    "./rgb-colorspaces": {
+      "types": "./dist/types/rgb-colorspaces/index.d.ts",
+      "require": "./dist/cjs/rgb-colorspaces/index.cjs",
+      "default": "./dist/esm/rgb-colorspaces/index.js"
+    },
+    "./transfer-functions": {
+      "types": "./dist/types/transfer-functions/index.d.ts",
+      "require": "./dist/cjs/transfer-functions/index.cjs",
+      "default": "./dist/esm/transfer-functions/index.js"
+    },
+    "./chromatic-adaptation": {
+      "types": "./dist/types/chromatic-adaptation/index.d.ts",
+      "require": "./dist/cjs/chromatic-adaptation/index.cjs",
+      "default": "./dist/esm/chromatic-adaptation/index.js"
+    }
   }
 }
