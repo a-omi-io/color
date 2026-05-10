@@ -4,8 +4,8 @@ import type { Matrix3x3 } from "../types";
  * Shared fixtures for matrix3 / matrix3-inverse specs.
  *
  * sRGB D65 RGB->XYZ matrix from IEC 61966-2-1 (published rounded values,
- * scale Y=1). Used here only as a non-trivial fixture; the authoritative
- * dataset version with full precision lands in Phase 5.
+ * scale Y=1). Used here only as a non-trivial fixture; authoritative
+ * full-precision matrices live in `@omi-io/color-datasets`.
  */
 export const SRGB_M: Matrix3x3 = [
     [0.4124564, 0.3575761, 0.1804375],

@@ -16,7 +16,7 @@ import type { TransferFunctionPair } from "@omi-io/color-core/types";
  * For 10-bit BT.2020 implementations the recommendation allows the
  * BT.709 rounded constants (`alpha = 1.099`, `beta = 0.018`); we expose the
  * 12-bit form here because it round-trips cleanly to 1e-12 across the unit
- * domain. PQ / HLG (BT.2100) are out of scope for Phase 4 minimum.
+ * domain. PQ / HLG (BT.2100) are not implemented here.
  *
  * Sources:
  * - ITU-R BT.2020-2, https://www.itu.int/rec/R-REC-BT.2020

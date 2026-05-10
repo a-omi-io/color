@@ -2,7 +2,7 @@ import { multiplyMatrix3x3 } from "@omi-io/color-core/math";
 import { CHROMATIC_ADAPTATION_TRANSFORMS } from "./transforms";
 
 describe("CHROMATIC_ADAPTATION_TRANSFORMS", () => {
-    it("contains all required Phase 6 CAT ids", () => {
+    it("contains the stable set of chromatic adaptation transform ids", () => {
         expect(Object.keys(CHROMATIC_ADAPTATION_TRANSFORMS).sort()).toEqual(
             [
                 "Bradford",

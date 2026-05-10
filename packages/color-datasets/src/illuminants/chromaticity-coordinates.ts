@@ -10,14 +10,13 @@ import type { IlluminantName, ObserverId, xy } from "@omi-io/color-core/types";
  * (`CCS_ILLUMINANTS["CIE 1931 2 Degree Standard Observer"]` and
  * `CCS_ILLUMINANTS["CIE 1964 10 Degree Standard Observer"]`).
  *
- * The 2 degree A / D50 / D65 entries are the same numbers that already
- * lived in the dataset prior to Phase 2 completion (their value just
- * happens to be invariant when rounded to 4 decimals from the canonical
- * 5-decimal CIE values, e.g. `0.31272 -> 0.3127`, `0.32903 -> 0.3290`).
+ * The 2 degree A / D50 / D65 entries match earlier dataset revisions
+ * (their value happens to be invariant when rounded to 4 decimals from the
+ * canonical 5-decimal CIE values, e.g. `0.31272 -> 0.3127`, `0.32903 -> 0.3290`).
  *
- * Stored as `Record` (not `Partial<Record>`) now that every observer ships
- * a complete table. The Phase 3 `xyzToXyY` fallback chromaticity is pinned
- * to the D65 / 2 degree entry by a cross-check spec.
+ * Stored as `Record` (not `Partial<Record>`) because every observer ships a
+ * complete table. The default `xyzToXyY` black-stimulus fallback chromaticity
+ * in `@omi-io/color-convert` matches this D65 / 2 degree row (cross-checked in specs).
  */
 export const CHROMATICITY_COORDINATES: Record<
     ObserverId,
