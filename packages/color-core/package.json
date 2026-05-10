@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-core",
   "scopeCommitName": "@:core",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Foundational colorimetry primitives—tuples, CIE constants, 3x3 matrix/vector math, channel normalization—without conversion logic.",
   "license": "MIT",
   "repository": {
@@ -63,5 +63,12 @@
       "require": "./dist/cjs/constants/index.cjs",
       "default": "./dist/esm/constants/index.js"
     }
-  }
+  },
+  "files": [
+    "dist",
+    "types/package.json",
+    "math/package.json",
+    "normalization/package.json",
+    "constants/package.json"
+  ]
 }
