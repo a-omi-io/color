@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-datasets",
   "scopeCommitName": "@:datasets",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Curated reference data: standard illuminants and tristimulus tables, RGB colorspace definitions, transfer-function pairs, and chromatic-adaptation transforms.",
   "keywords": [
     "color",
@@ -81,5 +81,12 @@
       "require": "./dist/cjs/chromatic-adaptation/index.cjs",
       "default": "./dist/esm/chromatic-adaptation/index.js"
     }
-  }
+  },
+  "files": [
+    "dist",
+    "illuminants/package.json",
+    "rgb-colorspaces/package.json",
+    "transfer-functions/package.json",
+    "chromatic-adaptation/package.json"
+  ]
 }
