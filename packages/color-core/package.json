@@ -3,6 +3,16 @@
   "scopeCommitName": "@:core",
   "version": "0.1.0",
   "description": "Foundational colorimetry primitives—tuples, CIE constants, 3x3 matrix/vector math, channel normalization—without conversion logic.",
+  "keywords": [
+    "color",
+    "colorimetry",
+    "cie",
+    "matrix",
+    "linear-algebra",
+    "normalization",
+    "gamma",
+    "tristimulus"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
