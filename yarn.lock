@@ -2767,6 +2767,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@omi-io/color-models@workspace:packages/color-models":
+  version: 0.0.0-use.local
+  resolution: "@omi-io/color-models@workspace:packages/color-models"
+  dependencies:
+    "@omi-io/pkg-scripts": "npm:v2.5.0"
+    "@types/jest": "npm:^29.5.0"
+    "@types/node": "npm:^20.11.30"
+    eslint: "npm:^8.57.0"
+    jest: "npm:^29.5.0"
+    ts-jest: "npm:^29.0.5"
+    typescript: "npm:~5.4.3"
+  languageName: unknown
+  linkType: soft
+
 "@omi-io/color@workspace:.":
   version: 0.0.0-use.local
   resolution: "@omi-io/color@workspace:."
