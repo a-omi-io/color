@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-convert",
   "scopeCommitName": "@:convert",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Composable color space conversions, chromatic adaptation, and color-difference metrics built on core types and reference datasets.",
   "keywords": [
     "color",
@@ -76,5 +76,10 @@
       "require": "./dist/cjs/conversions/index.cjs",
       "default": "./dist/esm/conversions/index.js"
     }
-  }
+  },
+  "files": [
+    "dist",
+    "adaptation/package.json",
+    "conversions/package.json"
+  ]
 }
