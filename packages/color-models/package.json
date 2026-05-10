@@ -3,6 +3,19 @@
   "scopeCommitName": "@:models",
   "version": "0.1.0",
   "description": "Nominal TypeScript brands for semantic color tuples (e.g. linear vs encoded RGB, XYZ, Lab) plus aliases for extended spaces like LCh and Oklab.",
+  "keywords": [
+    "color",
+    "branded-types",
+    "nominal-types",
+    "color-space",
+    "rgb",
+    "xyz",
+    "lab",
+    "oklab",
+    "lch",
+    "linear-light",
+    "colorimetry"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
