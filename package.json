@@ -1,6 +1,6 @@
 {
   "name": "@omi-io/color",
-  "description": "Color library",
+  "description": "Colorimetry: core math and types, branded color tuples, reference datasets, and composable space conversions.",
   "private": true,
   "engines": {
     "node": ">=20.0.0",
