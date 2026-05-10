@@ -1,6 +1,6 @@
 {
   "name": "@omi-io/color-core",
-  "scopeCommitName": "@:color-core",
+  "scopeCommitName": "@:core",
   "version": "0.0.1",
   "description": "Color core library",
   "license": "MIT",
@@ -24,6 +24,9 @@
     "lint": "eslint ./src",
     "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
+  "dependencies": {
+    "@omi-io/auxiliaries": "^1.1.0"
+  },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",
     "@types/jest": "^29.5.0",
@@ -39,6 +42,26 @@
       "require": "./dist/cjs/index.cjs",
       "default": "./dist/esm/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./types": {
+      "types": "./dist/types/types/index.d.ts",
+      "require": "./dist/cjs/types/types.cjs",
+      "default": "./dist/esm/types/types.js"
+    },
+    "./math": {
+      "types": "./dist/types/math/index.d.ts",
+      "require": "./dist/cjs/math/index.cjs",
+      "default": "./dist/esm/math/index.js"
+    },
+    "./normalization": {
+      "types": "./dist/types/normalization/index.d.ts",
+      "require": "./dist/cjs/normalization/index.cjs",
+      "default": "./dist/esm/normalization/index.js"
+    },
+    "./constants": {
+      "types": "./dist/types/constants/index.d.ts",
+      "require": "./dist/cjs/constants/index.cjs",
+      "default": "./dist/esm/constants/index.js"
+    }
   }
 }

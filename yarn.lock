@@ -2745,10 +2745,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@omi-io/auxiliaries@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@omi-io/auxiliaries@npm:1.1.0"
+  checksum: 10/a11fffd2b500f671c235fe52e76423ee78471f610bdb6036e1f52a992955860d5635cb5733cbaf9e8377d0499b66dba30f1b985da5e3e927a329fe418e7b86eb
+  languageName: node
+  linkType: hard
+
 "@omi-io/color-core@workspace:packages/color-core":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-core@workspace:packages/color-core"
   dependencies:
+    "@omi-io/auxiliaries": "npm:^1.1.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
