@@ -7,6 +7,8 @@ import {
     unsafeAsXYZ,
 } from "@omi-io/color-models";
 import { labToXYZ, xyzToLab } from "./xyz-lab";
+import { xyzToOklab } from "./xyz-oklab";
+import { oklabToRgb, rgbToOklab } from "./rgb-oklab";
 import { xyYToXYZ, xyzToXyY } from "./xyz-xyy";
 import { hslToRgb, rgbToHsl } from "./rgb-hsl";
 import { hsvToRgb, rgbToHsv } from "./rgb-hsv";
@@ -175,6 +177,20 @@ describePerf("conversions: performance budgets", () => {
             labToXYZ(LAB_SAMPLE, D65_XYZ);
         });
         expect(elapsedMs).toBeLessThan(500);
+    });
+
+    it("xyzToOklab 100k iterations finishes in budget", () => {
+        const { elapsedMs } = bench(100_000, () => {
+            xyzToOklab(XYZ_SAMPLE);
+        });
+        expect(elapsedMs).toBeLessThan(500);
+    });
+
+    it("rgbToOklab -> oklabToRgb round trip 50k iterations finishes in budget", () => {
+        const { elapsedMs } = bench(50_000, () => {
+            oklabToRgb(rgbToOklab(RGB_SAMPLE));
+        });
+        expect(elapsedMs).toBeLessThan(1000);
     });
 
     it("xyz <-> xyY round trip 50k iterations finishes in budget", () => {

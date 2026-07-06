@@ -21,6 +21,8 @@
     "cmyk",
     "xyz",
     "lab",
+    "oklab",
+    "oklch",
     "xyy",
     "ycbcr"
   ],

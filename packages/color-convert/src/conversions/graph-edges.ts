@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type { ConversionEdge } from "./graph";
 
 export const CONVERSION_EDGES: ReadonlyArray<ConversionEdge> = [
@@ -47,6 +48,42 @@ export const CONVERSION_EDGES: ReadonlyArray<ConversionEdge> = [
         from: "Lab D50",
         to: "XYZ D50",
         operation: "labToXYZD50",
+        reversible: true,
+    },
+    {
+        from: "Lab D50",
+        to: "LCh",
+        operation: "labToLCh",
+        reversible: true,
+    },
+    {
+        from: "LCh",
+        to: "Lab D50",
+        operation: "lChToLab",
+        reversible: true,
+    },
+    {
+        from: "XYZ D65",
+        to: "Oklab",
+        operation: "xyzToOklab",
+        reversible: true,
+    },
+    {
+        from: "Oklab",
+        to: "XYZ D65",
+        operation: "oklabToXYZ",
+        reversible: true,
+    },
+    {
+        from: "Oklab",
+        to: "Oklch",
+        operation: "oklabToOklch",
+        reversible: true,
+    },
+    {
+        from: "Oklch",
+        to: "Oklab",
+        operation: "oklchToOklab",
         reversible: true,
     },
     {

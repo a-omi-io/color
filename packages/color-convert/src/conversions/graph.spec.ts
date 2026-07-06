@@ -20,6 +20,27 @@ describe("conversion graph", () => {
         expect(back.map(edge => edge.operation)).toEqual(["yCbCrToRgbBT709"]);
     });
 
+    it("finds the documented path from sRGB encoded to Oklch via Oklab", () => {
+        const path = findConversionPath("sRGB encoded", "Oklch");
+        expect(path.map(edge => edge.operation)).toEqual([
+            "decodeRGB",
+            "rgbToXYZ",
+            "xyzToOklab",
+            "oklabToOklch",
+        ]);
+    });
+
+    it("finds the documented path from sRGB encoded to LCh via Lab D50", () => {
+        const path = findConversionPath("sRGB encoded", "LCh");
+        expect(path.map(edge => edge.operation)).toEqual([
+            "decodeRGB",
+            "rgbToXYZ",
+            "adaptD65ToD50",
+            "xyzToLabD50",
+            "labToLCh",
+        ]);
+    });
+
     it("has unique directed edges", () => {
         const keys = CONVERSION_EDGES.map(edge => `${edge.from}->${edge.to}`);
         expect(new Set(keys).size).toBe(keys.length);

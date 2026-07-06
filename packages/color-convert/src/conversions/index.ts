@@ -9,6 +9,11 @@ export {
 } from "./xyz-xyy";
 
 export { xyzToLab, labToXYZ } from "./xyz-lab";
+export { labToLCh, lChToLab } from "./xyz-lab-lch";
+export { xyzToOklab, oklabToXYZ } from "./xyz-oklab";
+export { oklabToOklch, oklchToOklab } from "./oklab-oklch";
+export { rgbToOklab, oklabToRgb } from "./rgb-oklab";
+export { rgbToOklch, oklchToRgb } from "./rgb-oklch";
 
 export {
     deltaE76,

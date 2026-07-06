@@ -29,6 +29,8 @@ Many encodings can be reached from one another through a small **directed graph*
 - `sRGB encoded`, `sRGB linear`
 - `XYZ D65`, `XYZ D50`
 - `Lab D50`
+- `LCh` (cylindrical form of `Lab D50` — same whitepoint, no separate illuminant suffix)
+- `Oklab`, `Oklch` (D65 by definition of the model — no illuminant suffix)
 - `HSL`, `HSV`, `CMYK`
 - `YCbCr BT.709` (full or limited range via the lower-level `rgbToYCbCr` / `yCbCrToRgb` options)
 
@@ -63,8 +65,17 @@ The pipeline’s internal operations (see `pipeline-operations.ts`) fix **sRGB**
 ### CIE Lab
 
 - **`xyzToLab(xyz, whitepoint)`** / **`labToXYZ(lab, whitepoint)`** — CIE 1976 L\*a\*b\* relative to any caller-supplied whitepoint **XYZ** triple.
+- **`labToLCh(lab)`** / **`lChToLab(lch)`** — cylindrical pair mirroring `oklabToOklch`/`oklchToOklab`: `C = hypot(a, b)`, `h = atan2(b, a)` in **degrees** normalized to `[0, 360)`. Near-achromatic input (`C <= EPSILON_CHROMA`) reports hue `0`. `LCh` is Lab's polar form for whatever whitepoint the `Lab` value carries — the graph's `LCh` node pairs it with `Lab D50`.
 
 The graph’s `Lab D50` legs use the package’s reference **D50** whitepoint from datasets; for other reference whites, call `xyzToLab` / `labToXYZ` directly.
+
+### Oklab and Oklch
+
+- **`xyzToOklab(xyz)`** / **`oklabToXYZ(oklab)`** — Björn Ottosson’s reference matrices (M1 → LMS, cube root, M2) for **XYZ under D65** on the Y = 1 scale. Oklab fixes D65 by construction, so there is no whitepoint parameter.
+- **`oklabToOklch(oklab)`** / **`oklchToOklab(oklch)`** — cylindrical pair: `C = hypot(a, b)`, `h = atan2(b, a)` in **degrees** normalized to `[0, 360)`. Near-achromatic input (`C <= EPSILON_CHROMA`) reports hue `0`.
+- **`rgbToOklab(rgb, space?)`** / **`oklabToRgb(oklab, space?)`** — direct helpers for canonical **gamma-encoded RGB** in the unit domain (decode → matrix → Oklab, and back). **`oklabToRgb` does not clamp**: out-of-gamut channels are returned as computed (finite, possibly outside `[0, 1]`); clamping or gamut mapping is the caller’s decision.
+- **`rgbToOklch(rgb, space?)`** / **`oklchToRgb(oklch, space?)`** — shortcuts composing the Oklab helpers above with `oklabToOklch`/`oklchToOklab`, skipping the manual 4–5 step pipeline. Same no-clamp policy as `oklabToRgb`.
+- **`space`** (all four helpers) is an optional **`RGBColorspaceId`** from `@omi-io/color-core`, defaulting to `"sRGB"` — existing call sites are unaffected. **Wide-gamut is exact only for D65-whitepoint spaces** (`sRGB`, `Display P3`, `Rec.709`, `Rec.2020`, `Adobe RGB`, `DCI-P3`): Oklab is defined for D65, and these share it, so `decode → linear → matrix(space → XYZ) → Oklab` is the same exact chain, just parameterized. **Non-D65 spaces throw** (`ACES`, `ACEScg`, both D60) rather than silently applying no chromatic adaptation.
 
 ### sRGB transfer and linearisation
 

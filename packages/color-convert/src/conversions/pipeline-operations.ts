@@ -7,14 +7,25 @@ import type {
     RGB,
     YCbCr,
 } from "@omi-io/color-core/types";
-import type { EncodedRGB, Lab, LinearRGB, XYZ } from "@omi-io/color-models";
+import type {
+    EncodedRGB,
+    Lab,
+    LCh,
+    LinearRGB,
+    Oklab,
+    Oklch,
+    XYZ,
+} from "@omi-io/color-models";
 import { adaptationOptions, asCMYK, asVec3 } from "./pipeline-helpers";
+import { oklabToOklch, oklchToOklab } from "./oklab-oklch";
 import { cmykToRgb, rgbToCmyk } from "./rgb-cmyk";
 import { hslToRgb, rgbToHsl } from "./rgb-hsl";
 import { hsvToRgb, rgbToHsv } from "./rgb-hsv";
 import { decodeRGB, encodeRGB, rgbToXYZ, xyzToRGB } from "./rgb-xyz";
 import { rgbToYCbCr, yCbCrToRgb } from "./rgb-ycbcr";
 import { labToXYZ, xyzToLab } from "./xyz-lab";
+import { labToLCh, lChToLab } from "./xyz-lab-lch";
+import { oklabToXYZ, xyzToOklab } from "./xyz-oklab";
 
 export function applyConversionOperation(
     value: ReadonlyArray<number>,
@@ -51,6 +62,18 @@ export function applyConversionOperation(
             return xyzToLab(asVec3<XYZ>(value), d50);
         case "labToXYZD50":
             return labToXYZ(asVec3<Lab>(value), d50);
+        case "labToLCh":
+            return labToLCh(asVec3<Lab>(value));
+        case "lChToLab":
+            return lChToLab(asVec3<LCh>(value));
+        case "xyzToOklab":
+            return xyzToOklab(asVec3<XYZ>(value));
+        case "oklabToXYZ":
+            return oklabToXYZ(asVec3<Oklab>(value));
+        case "oklabToOklch":
+            return oklabToOklch(asVec3<Oklab>(value));
+        case "oklchToOklab":
+            return oklchToOklab(asVec3<Oklch>(value));
         case "rgbToHsl":
             return rgbToHsl(asVec3<RGB>(value));
         case "hslToRgb":
