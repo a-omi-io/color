@@ -1,3 +1,17 @@
+## 0.2.0 (2026-07-06)
+
+### 🚀 Features
+
+- **@:models:** add alpha-bearing color tuple brands and helpers ([ac84ef1](https://github.com/a-omi-io/color/commit/ac84ef1))
+
+### 🧹 Chores
+
+- **@:models:** add npm keywords for discoverability ([a37d021](https://github.com/a-omi-io/color/commit/a37d021))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.1.0 (2026-05-10)
 
 ### 🚀 Features
