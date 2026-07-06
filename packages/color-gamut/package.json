@@ -41,7 +41,7 @@
   "dependencies": {
     "@omi-io/color-convert": "^0.1.0",
     "@omi-io/color-core": "^0.1.0",
-    "@omi-io/color-models": "^0.1.0"
+    "@omi-io/color-models": "^0.2.0"
   },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",
