@@ -1,3 +1,13 @@
+## 0.2.0 (2026-07-06)
+
+### 🚀 Features
+
+- **@:convert:** add Oklab/Oklch, Lab↔LCh and sRGB↔Oklch conversions ([9c53eb3](https://github.com/a-omi-io/color/commit/9c53eb3))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.1.0 (2026-05-10)
 
 ### 🚀 Features

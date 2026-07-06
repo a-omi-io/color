@@ -2752,7 +2752,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@omi-io/color-convert@npm:^0.1.0, @omi-io/color-convert@workspace:packages/color-convert":
+"@omi-io/color-convert@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@omi-io/color-convert@npm:0.1.0"
+  dependencies:
+    "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/color-datasets": "npm:^0.1.0"
+    "@omi-io/color-models": "npm:^0.1.0"
+  checksum: 10/0d1ba3414a36cce7e7d9b3e793cb238fc760696b8fddea9efaaf3c0be3a6c39416a4ae8d96ebb8299ce4e3736bc89e6996db83a04adcd1161d346d9b9d429d54
+  languageName: node
+  linkType: hard
+
+"@omi-io/color-convert@workspace:packages/color-convert":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-convert@workspace:packages/color-convert"
   dependencies:
@@ -2832,6 +2843,15 @@ __metadata:
     typescript: "npm:~5.4.3"
   languageName: unknown
   linkType: soft
+
+"@omi-io/color-models@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@omi-io/color-models@npm:0.1.0"
+  dependencies:
+    "@omi-io/color-core": "npm:^0.1.0"
+  checksum: 10/244da27fb6b13588814202a5ff9061625536afbf8db63e98200c60bfc78715ade299e7b14eddee9db89ffbc35c609067c33f7aadb14a48a0c9660412636f290c
+  languageName: node
+  linkType: hard
 
 "@omi-io/color-models@npm:^0.2.0, @omi-io/color-models@workspace:packages/color-models":
   version: 0.0.0-use.local
