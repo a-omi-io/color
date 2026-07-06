@@ -15,3 +15,16 @@ export {
     unsafeAsOklab,
     unsafeAsOklch,
 } from "./extended";
+
+export type { HSLA, Laba, LCha, Oklaba, Oklcha, RGBA } from "./alpha";
+export {
+    alphaOf,
+    dropAlpha,
+    unsafeAsHSLA,
+    unsafeAsLaba,
+    unsafeAsLCha,
+    unsafeAsOklaba,
+    unsafeAsOklcha,
+    unsafeAsRGBA,
+    withAlpha,
+} from "./alpha";
