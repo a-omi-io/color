@@ -1,0 +1,81 @@
+{
+  "name": "@omi-io/color-css",
+  "scopeCommitName": "@:css",
+  "version": "0.1.0",
+  "description": "CSS color string parsing and serialization: hex, rgb(), hsl(), hsv(), cmyk(), lab(), lch(), oklab(), oklch(), color(), named colors — normalized to canonical [0,1] sRGB plus alpha.",
+  "keywords": [
+    "color",
+    "css",
+    "css-color-4",
+    "parse",
+    "serialize",
+    "hex",
+    "rgb",
+    "hsl",
+    "oklch",
+    "oklab",
+    "lab",
+    "lch",
+    "named-colors",
+    "alpha",
+    "display-p3"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-omi-io/color.git",
+    "directory": "packages/color-css"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "scripts": {
+    "clean": "omi-io-pkg clean",
+    "build": "yarn clean && omi-io-pkg build && tsc && omi-io-pkg alias",
+    "test": "jest",
+    "lint": "eslint ./src",
+    "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@omi-io/color-convert": "^0.1.0",
+    "@omi-io/color-core": "^0.1.0",
+    "@omi-io/color-models": "^0.1.0"
+  },
+  "devDependencies": {
+    "@omi-io/pkg-scripts": "v2.5.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.11.30",
+    "eslint": "^8.57.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "typescript": "~5.4.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.js"
+    },
+    "./package.json": "./package.json",
+    "./parse": {
+      "types": "./dist/types/parse/index.d.ts",
+      "require": "./dist/cjs/parse/index.cjs",
+      "default": "./dist/esm/parse/index.js"
+    },
+    "./serialize": {
+      "types": "./dist/types/serialize/index.d.ts",
+      "require": "./dist/cjs/serialize/index.cjs",
+      "default": "./dist/esm/serialize/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "parse/package.json",
+    "serialize/package.json"
+  ]
+}
