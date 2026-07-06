@@ -1,3 +1,13 @@
+## 0.2.1 (2026-07-06)
+
+### 📚 Documentation
+
+- **@:models:** document alpha-bearing brands and helpers ([4b205c1](https://github.com/a-omi-io/color/commit/4b205c1))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.2.0 (2026-07-06)
 
 ### 🚀 Features
