@@ -57,7 +57,8 @@
       "specifierSource": "conventional-commits",
       "currentVersionResolver": "git-tag",
       "fallbackCurrentVersionResolver": "disk",
-      "preserveLocalDependencyProtocols": false
+      "preserveLocalDependencyProtocols": false,
+      "updateDependents": "never"
     },
     "releaseTag": {
       "pattern": "{projectName}@{version}"
