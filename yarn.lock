@@ -2752,7 +2752,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@omi-io/color-convert@workspace:packages/color-convert":
+"@omi-io/color-convert@npm:^0.1.0, @omi-io/color-convert@workspace:packages/color-convert":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-convert@workspace:packages/color-convert"
   dependencies:
@@ -2784,11 +2784,45 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@omi-io/color-css@workspace:packages/color-css":
+  version: 0.0.0-use.local
+  resolution: "@omi-io/color-css@workspace:packages/color-css"
+  dependencies:
+    "@omi-io/color-convert": "npm:^0.1.0"
+    "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/color-models": "npm:^0.1.0"
+    "@omi-io/pkg-scripts": "npm:v2.5.0"
+    "@types/jest": "npm:^29.5.0"
+    "@types/node": "npm:^20.11.30"
+    eslint: "npm:^8.57.0"
+    jest: "npm:^29.5.0"
+    ts-jest: "npm:^29.0.5"
+    typescript: "npm:~5.4.3"
+  languageName: unknown
+  linkType: soft
+
 "@omi-io/color-datasets@npm:^0.1.0, @omi-io/color-datasets@workspace:packages/color-datasets":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-datasets@workspace:packages/color-datasets"
   dependencies:
     "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/pkg-scripts": "npm:v2.5.0"
+    "@types/jest": "npm:^29.5.0"
+    "@types/node": "npm:^20.11.30"
+    eslint: "npm:^8.57.0"
+    jest: "npm:^29.5.0"
+    ts-jest: "npm:^29.0.5"
+    typescript: "npm:~5.4.3"
+  languageName: unknown
+  linkType: soft
+
+"@omi-io/color-gamut@workspace:packages/color-gamut":
+  version: 0.0.0-use.local
+  resolution: "@omi-io/color-gamut@workspace:packages/color-gamut"
+  dependencies:
+    "@omi-io/color-convert": "npm:^0.1.0"
+    "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/color-models": "npm:^0.1.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
