@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-convert",
   "scopeCommitName": "@:convert",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Composable color space conversions, chromatic adaptation, and color-difference metrics built on core types and reference datasets.",
   "keywords": [
     "color",

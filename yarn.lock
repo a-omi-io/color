@@ -2752,7 +2752,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@omi-io/color-convert@npm:^0.2.0, @omi-io/color-convert@workspace:packages/color-convert":
+"@omi-io/color-convert@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@omi-io/color-convert@npm:0.2.0"
+  dependencies:
+    "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/color-datasets": "npm:^0.1.0"
+    "@omi-io/color-models": "npm:^0.2.0"
+  checksum: 10/d990e6344291ada3dcc9faff900c0f724496c49c72818e9f2867a1c4dcdc4d7a6ff153c70c7ddd54212a46ae1a52f0961c99ce1fa8676177c59e85de789d0c55
+  languageName: node
+  linkType: hard
+
+"@omi-io/color-convert@workspace:packages/color-convert":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-convert@workspace:packages/color-convert"
   dependencies:

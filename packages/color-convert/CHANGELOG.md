@@ -1,3 +1,13 @@
+## 0.3.0 (2026-08-03)
+
+### 🚀 Features
+
+- **@:convert:** pin CIELAB D50 adaptation leg to Bradford via CIELAB_D50_ADAPTATION ([34e2d86](https://github.com/a-omi-io/color/commit/34e2d86))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.2.0 (2026-07-06)
 
 ### 🚀 Features
