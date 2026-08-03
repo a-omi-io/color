@@ -1,2 +1,5 @@
 export { matrixChromaticAdaptationVonKries } from "./von-kries";
-export { chromaticallyAdaptXYZ } from "./chromatic-adaptation";
+export {
+    chromaticallyAdaptXYZ,
+    CIELAB_D50_ADAPTATION,
+} from "./chromatic-adaptation";

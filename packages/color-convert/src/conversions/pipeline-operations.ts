@@ -16,7 +16,7 @@ import type {
     Oklch,
     XYZ,
 } from "@omi-io/color-models";
-import { adaptationOptions, asCMYK, asVec3 } from "./pipeline-helpers";
+import { asCMYK, asVec3, cielabAdaptationOptions } from "./pipeline-helpers";
 import { oklabToOklch, oklchToOklab } from "./oklab-oklch";
 import { cmykToRgb, rgbToCmyk } from "./rgb-cmyk";
 import { hslToRgb, rgbToHsl } from "./rgb-hsl";
@@ -49,14 +49,14 @@ export function applyConversionOperation(
                 asVec3<XYZ>(value),
                 d65,
                 d50,
-                adaptationOptions(options)
+                cielabAdaptationOptions(options)
             );
         case "adaptD50ToD65":
             return chromaticallyAdaptXYZ(
                 asVec3<XYZ>(value),
                 d50,
                 d65,
-                adaptationOptions(options)
+                cielabAdaptationOptions(options)
             );
         case "xyzToLabD50":
             return xyzToLab(asVec3<XYZ>(value), d50);

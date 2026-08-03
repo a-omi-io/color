@@ -50,11 +50,15 @@ const { value, path } = convertByPipeline(
 
 Pipeline options use `RGBColorspaceConversionOptions` from `@omi-io/color-core`:
 
-- **`adaptation`** — when not `false`, forwarded as `ChromaticAdaptationOptions` to **`chromaticallyAdaptXYZ`** on the graph’s D65 ↔ D50 edges (e.g. **`transform`**). Setting **`adaptation: false`** does **not** skip those steps; it is only meaningful for **`convertRGBColorspace`** (see below).
+- **`adaptation`** — when not `false`, forwarded as `ChromaticAdaptationOptions` to **`chromaticallyAdaptXYZ`** on the graph’s D65 ↔ D50 edges (e.g. **`transform`**). Setting **`adaptation: false`** does **not** skip those steps; it is only meaningful for **`convertRGBColorspace`** (see below). Omitting **`transform`** on those edges resolves to **`CIELAB_D50_ADAPTATION`** (**Bradford**), not to `DEFAULTS.chromaticAdaptationTransform` — see below.
 - **`clamp`** — gamut handling (`"none"` | `"target-gamut"` | `"unit"`).
 - **`returnIntermediate`** — when `true`, `convertByPipeline` fills an optional **`trace`** (`RGBConversionTrace`) with intermediate encoded/linear RGB and XYZ values where applicable.
 
-The pipeline’s internal operations (see `pipeline-operations.ts`) fix **sRGB** transfer functions and Bradford-style defaults for graph steps; for arbitrary RGB working spaces, use **`convertRGBColorspace`** (below) instead of assuming the graph’s sRGB node.
+The pipeline’s internal operations (see `pipeline-operations.ts`) fix **sRGB** transfer functions for graph steps; for arbitrary RGB working spaces, use **`convertRGBColorspace`** (below) instead of assuming the graph’s sRGB node.
+
+### The CIELAB D50 leg is Bradford, not CAT02
+
+The `XYZ D65` ↔ `XYZ D50` edges — the only way in or out of `Lab D50` / `LCh` — default to **`CIELAB_D50_ADAPTATION`** (`{ transform: "Bradford" }`) instead of the library-wide `DEFAULTS.chromaticAdaptationTransform` (`CAT02`, matching `colour-science`). D50 exists in this graph to serve the **ICC / CSS Color Module Level 4** side of the world, and both specify Bradford: `blue` converts to `lab(29.5683 68.2986 -112.0294)`, the value published in the CSS spec and rendered by browsers, and `@omi-io/color-css` parses `lab()`/`lch()` through the very same constant. Pass **`{ adaptation: { transform: "CAT02" } }`** explicitly to opt back out — the caller’s transform always wins.
 
 ## Primitive conversions (composable building blocks)
 
@@ -102,6 +106,7 @@ From **`@omi-io/color-convert/adaptation`** (also re-exported from the root):
 
 - **`matrixChromaticAdaptationVonKries(sourceWhite, targetWhite, transform)`** — builds a **3×3** Von Kries cone-ratio matrix for a **`ChromaticAdaptationTransform`** from datasets (cone matrix XYZ→LMS and normalization).
 - **`chromaticallyAdaptXYZ(xyz, sourceWhite, targetWhite, options?)`** — multiplies **XYZ** by that matrix; **`options.transform`** selects the CAT transform id (default from **`DEFAULTS.chromaticAdaptationTransform`**).
+- **`CIELAB_D50_ADAPTATION`** — the transform the pipeline’s D65 ↔ D50 edges default to (**Bradford**, per ICC / CSS Color 4). Exported so consumers that convert to `Lab D50` / `LCh` by hand — or that print `lab()`/`lch()` — stay byte-identical to the graph and to `@omi-io/color-css`.
 
 Whitepoints may be **XYZ** vectors or **xy** chromaticity (see `ChromaticAdaptationOptions` in `@omi-io/color-core`). The Von Kries helper aligns mismatched **Y** scales when source and target differ enough to avoid silent mixing of absolute and normalized whites.
 

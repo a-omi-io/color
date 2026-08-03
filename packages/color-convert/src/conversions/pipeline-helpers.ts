@@ -3,11 +3,27 @@ import type {
     ChromaticAdaptationOptions,
     RGBColorspaceConversionOptions,
 } from "@omi-io/color-core/types";
+import { CIELAB_D50_ADAPTATION } from "../adaptation";
 
 export function adaptationOptions(
     options?: RGBColorspaceConversionOptions
 ): ChromaticAdaptationOptions | undefined {
     return options?.adaptation === false ? undefined : options?.adaptation;
+}
+
+/**
+ * Adaptation options for the graph's D65 ↔ D50 edges: the caller's, with the
+ * transform defaulting to `CIELAB_D50_ADAPTATION` (Bradford, per ICC / CSS
+ * Color 4) rather than to `DEFAULTS.chromaticAdaptationTransform`. Any other
+ * field the caller passed (`sourceWhite`/`targetWhite`) is preserved.
+ */
+export function cielabAdaptationOptions(
+    options?: RGBColorspaceConversionOptions
+): ChromaticAdaptationOptions {
+    const provided = adaptationOptions(options);
+    return provided?.transform === undefined
+        ? { ...provided, ...CIELAB_D50_ADAPTATION }
+        : provided;
 }
 
 /**
