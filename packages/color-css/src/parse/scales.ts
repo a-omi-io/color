@@ -4,6 +4,7 @@
  * package README / the `parseColor` doc comment for the full mapping.
  */
 
+import { CIELAB_D50_ADAPTATION } from "@omi-io/color-convert";
 import type {
     RGBColorspaceConversionOptions,
     RGBColorspaceId,
@@ -29,7 +30,13 @@ export const COLOR_FUNCTION_SPACES: Readonly<Record<string, RGBColorspaceId>> =
         "display-p3": "Display P3",
     };
 
-/** CSS Color 4 uses Bradford for the D50 ↔ D65 leg of `lab()`/`lch()`. */
+/**
+ * CSS Color 4 uses Bradford for the D50 ↔ D65 leg of `lab()`/`lch()`. Taken
+ * from `@omi-io/color-convert` rather than spelled out here: the pipeline
+ * defaults that leg to the same transform, and the two must not drift — when
+ * they did, a `lab()` string parsed here and re-derived through the pipeline
+ * came back as a different color.
+ */
 export const LAB_PIPELINE_OPTIONS: RGBColorspaceConversionOptions = {
-    adaptation: { transform: "Bradford" },
+    adaptation: CIELAB_D50_ADAPTATION,
 };

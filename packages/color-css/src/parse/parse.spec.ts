@@ -188,6 +188,26 @@ describe("parseColor: lab() / lch()", () => {
         expect(parsed?.alpha).toBeCloseTo(0.4, 10);
     });
 
+    // Regression: the parser pins Bradford (CSS Color 4) while the pipeline
+    // used to fall back to `DEFAULTS.chromaticAdaptationTransform` (CAT02), so
+    // a `lab()` string parsed here and re-derived through the DEFAULT pipeline
+    // path came back as a different color (~1.3 units of a/b). Both sides now
+    // resolve to `CIELAB_D50_ADAPTATION`; assert it with NO options passed.
+    it("round-trips through the pipeline's default Lab D50 path", () => {
+        const coords = [51.363, 120, -120] as const;
+        const parsed = parseColor(
+            `lab(${coords[0]} ${coords[1]} ${coords[2]})`
+        );
+        const back = convertByPipeline(
+            parsed?.rgb as RGB,
+            "sRGB encoded",
+            "Lab D50"
+        ).value;
+        expect(back[0]).toBeCloseTo(coords[0], 8);
+        expect(back[1]).toBeCloseTo(coords[1], 8);
+        expect(back[2]).toBeCloseTo(coords[2], 8);
+    });
+
     it("scales lab() a/b percentages by 1.25", () => {
         const expected = convertByPipeline(
             [50, 125, -62.5],
