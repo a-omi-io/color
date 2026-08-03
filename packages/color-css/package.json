@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-css",
   "scopeCommitName": "@:css",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CSS color string parsing and serialization: hex, rgb(), hsl(), hsv(), cmyk(), lab(), lch(), oklab(), oklch(), color(), named colors — normalized to canonical [0,1] sRGB plus alpha.",
   "keywords": [
     "color",
