@@ -1,3 +1,9 @@
+## 0.2.0 (2026-08-03)
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.1.0 (2026-07-06)
 
 ### 🚀 Features
