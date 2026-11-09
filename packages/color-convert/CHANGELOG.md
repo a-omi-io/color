@@ -1,3 +1,17 @@
+## 0.4.0 (2026-11-09)
+
+### 🩹 Fixes
+
+- ⚠️  **@:convert:** oklab and lab per CSS Color 4 — exact greys, one answer per path, non-D65 spaces adapted ([36f9fa9](https://github.com/a-omi-io/color/commit/36f9fa9))
+
+### ⚠️  Breaking Changes
+
+- **@:convert:** oklab and lab per CSS Color 4 — exact greys, one answer per path, non-D65 spaces adapted  ([36f9fa9](https://github.com/a-omi-io/color/commit/36f9fa9))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.3.0 (2026-08-03)
 
 ### 🚀 Features
