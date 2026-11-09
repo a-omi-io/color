@@ -10,6 +10,11 @@ export interface RgbToCmykOptions {
     simpleInverse?: boolean;
 }
 
+/**
+ * sRGB-encoded RGB → CMYK, all channels fractions in `[0, 1]` — the CSS
+ * Color 5 `device-cmyk` "naive conversion". Convention: RGB is clamped to
+ * `[0, 1]` first (an out-of-gamut colour converts as the clipped colour).
+ */
 export function rgbToCmyk(rgb: RGB, options?: RgbToCmykOptions): CMYK {
     const [r, g, b] = [clampUnit(rgb[0]), clampUnit(rgb[1]), clampUnit(rgb[2])];
     if (options?.simpleInverse === true) return [1 - r, 1 - g, 1 - b, 0];
@@ -23,6 +28,7 @@ export function rgbToCmyk(rgb: RGB, options?: RgbToCmykOptions): CMYK {
     ];
 }
 
+/** CMYK (fractions, clamped to `[0, 1]`) → sRGB-encoded RGB, CSS Color 5 naive. */
 export function cmykToRgb([c, m, y, k]: CMYK): RGB {
     const cyan = clampUnit(c);
     const magenta = clampUnit(m);

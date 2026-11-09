@@ -1,8 +1,14 @@
-import type { RGB } from "@omi-io/color-core/types";
+import type { RGB, RGBColorspaceId } from "@omi-io/color-core/types";
+import { RGB_COLORSPACES } from "@omi-io/color-datasets";
 import type { Oklab } from "@omi-io/color-models";
-import { unsafeAsOklab, unsafeAsOklch } from "@omi-io/color-models";
+import {
+    unsafeAsEncodedRGB,
+    unsafeAsOklab,
+    unsafeAsOklch,
+} from "@omi-io/color-models";
 import { oklchToOklab } from "./oklab-oklch";
-import { oklabToRgb, rgbToOklab } from "./rgb-oklab";
+import { oklabToLinearRgb, oklabToRgb, rgbToOklab } from "./rgb-oklab";
+import { decodeRGB, encodeRGB } from "./rgb-xyz";
 
 function expectVec3Within(
     actual: ReadonlyArray<number>,
@@ -18,58 +24,74 @@ function expectVec3Within(
 }
 
 /**
- * Acceptance vectors from Björn Ottosson's reference implementation
- * (https://bottosson.github.io/posts/oklab/), gamma sRGB in unit domain.
+ * Chris Lilley, "OKLab notes", "Standard values":
+ * https://github.com/svgeesus/svgeesus.github.io/blob/master/Color/OKLab-notes.md
+ * Values rounded to 6 decimals; tolerance 5e-7 is half the last-place unit.
  */
-const OTTOSSON_SRGB_VECTORS: ReadonlyArray<{
+const PUBLISHED_SRGB_VECTORS: ReadonlyArray<{
     name: string;
     rgb: RGB;
     oklab: Oklab;
 }> = [
+    { name: "white", rgb: [1, 1, 1], oklab: unsafeAsOklab([1, 0, 0] as const) },
     {
-        name: "#FFFFFF",
-        rgb: [1, 1, 1],
-        oklab: unsafeAsOklab([1, 0, 0] as const),
-    },
-    {
-        name: "#FF0000",
+        name: "red",
         rgb: [1, 0, 0],
-        oklab: unsafeAsOklab([0.628, 0.2249, 0.1258] as const),
+        oklab: unsafeAsOklab([0.627955, 0.224863, 0.125846] as const),
     },
     {
-        name: "#00FF00",
+        name: "green",
         rgb: [0, 1, 0],
-        oklab: unsafeAsOklab([0.8664, -0.2339, 0.1795] as const),
+        oklab: unsafeAsOklab([0.86644, -0.233888, 0.179498] as const),
     },
     {
-        name: "#0000FF",
+        name: "blue",
         rgb: [0, 0, 1],
-        oklab: unsafeAsOklab([0.452, -0.0324, -0.3121] as const),
+        oklab: unsafeAsOklab([0.452014, -0.032457, -0.311528] as const),
     },
+    {
+        name: "cyan",
+        rgb: [0, 1, 1],
+        oklab: unsafeAsOklab([0.905399, -0.149444, -0.039398] as const),
+    },
+    {
+        name: "magenta",
+        rgb: [1, 0, 1],
+        oklab: unsafeAsOklab([0.701674, 0.274566, -0.169156] as const),
+    },
+    {
+        name: "yellow",
+        rgb: [1, 1, 0],
+        oklab: unsafeAsOklab([0.967983, -0.071369, 0.19857] as const),
+    },
+    { name: "black", rgb: [0, 0, 0], oklab: unsafeAsOklab([0, 0, 0] as const) },
 ];
 
 describe("rgbToOklab", () => {
-    OTTOSSON_SRGB_VECTORS.forEach(({ name, rgb, oklab }) => {
-        it(`matches the Ottosson reference vector for sRGB ${name}`, () => {
-            expectVec3Within(rgbToOklab(rgb), oklab, 1e-3);
+    PUBLISHED_SRGB_VECTORS.forEach(({ name, rgb, oklab }) => {
+        it(`matches the published 6-decimal value for sRGB ${name}`, () => {
+            expectVec3Within(rgbToOklab(rgb), oklab, 5e-7);
         });
     });
 
     it("maps black to L=0, a=0, b=0", () => {
         expectVec3Within(rgbToOklab([0, 0, 0]), [0, 0, 0], 1e-15);
     });
+
+    it("maps white to L=1, a=b=0 to float precision (CSS Color 4 M1/M2)", () => {
+        expectVec3Within(rgbToOklab([1, 1, 1]), [1, 0, 0], 1e-15);
+    });
 });
 
 describe("oklabToRgb", () => {
-    OTTOSSON_SRGB_VECTORS.forEach(({ name, rgb }) => {
+    PUBLISHED_SRGB_VECTORS.forEach(({ name, rgb }) => {
         it(`inverts rgbToOklab for sRGB ${name}`, () => {
-            expectVec3Within(oklabToRgb(rgbToOklab(rgb)), rgb, 1e-9);
+            expectVec3Within(oklabToRgb(rgbToOklab(rgb)), rgb, 1e-12);
         });
     });
 
     it("does NOT clamp out-of-sRGB-gamut results (caller's decision)", () => {
-        // C=0.35 at a green-ish hue is far outside the sRGB gamut, so at
-        // least one channel must leave [0, 1] and pass through unclamped.
+        // This high-chroma green lies outside the sRGB gamut.
         const outOfGamut = oklchToOklab(
             unsafeAsOklch([0.7, 0.35, 150] as const)
         );
@@ -77,6 +99,22 @@ describe("oklabToRgb", () => {
         expect(rgb.every(Number.isFinite)).toBe(true);
         expect(Math.min(...rgb) < 0 || Math.max(...rgb) > 1).toBe(true);
     });
+});
+
+describe("oklabToLinearRgb", () => {
+    it.each<RGBColorspaceId>(["sRGB", "ACES", "DCI-P3"])(
+        "preserves unclamped linear channels and the encoded result in %s",
+        space => {
+            const rgb = unsafeAsEncodedRGB([-0.05, 0.4, 1.1] as const);
+            const oklab = rgbToOklab(rgb, space);
+            const { transfer } = RGB_COLORSPACES[space];
+            const linear = oklabToLinearRgb(oklab, space);
+            expectVec3Within(linear, decodeRGB(rgb, transfer), 1e-12);
+            const encoded = encodeRGB(linear, transfer);
+            expect(encoded).toEqual(oklabToRgb(oklab, space));
+            expectVec3Within(encoded, rgb, 1e-12);
+        }
+    );
 });
 
 describe("rgb -> oklab -> rgb round-trip on the 6x6x6 grid", () => {

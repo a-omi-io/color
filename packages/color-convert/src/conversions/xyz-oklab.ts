@@ -1,21 +1,19 @@
 /**
  * Scalar conversions between CIE XYZ (D65, Y = 1 scale) and Oklab.
  *
- * Formulas and matrices follow Björn Ottosson's reference definition:
- * https://bottosson.github.io/posts/oklab/
+ * Oklab structure: Björn Ottosson (https://bottosson.github.io/posts/oklab/).
  *
- *   LMS  = M1 * XYZ_D65
- *   LMS' = cbrt(LMS)                    (componentwise)
- *   Lab  = M2 * LMS'
+ * M1 and M2 are the white-consistent matrices published in CSS Color 4,
+ * 3 November 2026, §19 ("Sample code for Color Conversions", `XYZ_to_OKLab`):
+ * https://www.w3.org/TR/2026/CRD-css-color-4-20261103/#color-conversion-code
+ * XYZ uses D65 xy (0.3127, 0.3290), shared with the RGB colorspace matrices.
  *
  * Oklab is defined against D65 by construction, so unlike CIE Lab there is
  * no whitepoint parameter. `Math.cbrt` preserves sign, so slightly negative
- * LMS components (out-of-gamut inputs) stay finite and round-trip exactly.
+ * LMS components (out-of-gamut inputs) stay finite.
  *
- * The inverse matrices are derived numerically from the published forward
- * matrices (same approach as the CAT transforms in `@omi-io/color-datasets`)
- * so the round trip closes to floating-point precision instead of the four
- * decimals of a re-typed published inverse.
+ * Inverses are derived from the forward matrices to limit round-trip error
+ * to floating-point arithmetic.
  */
 
 import {
@@ -26,18 +24,18 @@ import type { Matrix3x3, Vec3 } from "@omi-io/color-core/types";
 import type { Oklab, XYZ } from "@omi-io/color-models";
 import { unsafeAsOklab, unsafeAsXYZ } from "@omi-io/color-models";
 
-/** Ottosson M1: XYZ (D65, Y = 1) → cone-like LMS. */
+/** M1 (CSS Color 4 `XYZtoLMS`): XYZ (D65 from xy, Y = 1) → cone-like LMS. */
 const MATRIX_XYZ_D65_TO_LMS: Matrix3x3 = [
-    [0.8189330101, 0.3618667424, -0.1288597137],
-    [0.0329845436, 0.9293118715, 0.0361456387],
-    [0.0482003018, 0.2643662691, 0.633851707],
+    [0.819022437996703, 0.3619062600528904, -0.1288737815209879],
+    [0.0329836539323885, 0.9292868615863434, 0.0361446663506424],
+    [0.0481771893596242, 0.2642395317527308, 0.6335478284694309],
 ];
 
-/** Ottosson M2: non-linear LMS′ → Oklab. */
+/** M2 (CSS Color 4 `LMStoOKLab`): non-linear LMS′ → Oklab. */
 const MATRIX_LMS_PRIME_TO_OKLAB: Matrix3x3 = [
-    [0.2104542553, 0.793617785, -0.0040720468],
-    [1.9779984951, -2.428592205, 0.4505937099],
-    [0.0259040371, 0.7827717662, -0.808675766],
+    [0.210454268309314, 0.7936177747023054, -0.0040720430116193],
+    [1.9779985324311684, -2.4285922420485799, 0.450593709617411],
+    [0.0259040424655478, 0.7827717124575296, -0.8086757549230774],
 ];
 
 const MATRIX_LMS_TO_XYZ_D65: Matrix3x3 = invertMatrix3x3(MATRIX_XYZ_D65_TO_LMS);

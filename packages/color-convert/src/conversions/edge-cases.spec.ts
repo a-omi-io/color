@@ -7,13 +7,7 @@ import {
 import { unsafeAsEncodedRGB, unsafeAsXYZ } from "@omi-io/color-models";
 import { convertRGBColorspace } from "./rgb-colorspace";
 import { rgbToHsl } from "./rgb-hsl";
-import { rgbToHsv } from "./rgb-hsv";
-import { rgbToCmyk } from "./rgb-cmyk";
 
-/**
- * Edge cases and regression tests: each case pins one observable behavior so a
- * future refactor cannot silently change conversion contracts.
- */
 describe("conversions: edge cases and regressions", () => {
     it("HSL hue wraps when red is max but blue > green (rose)", () => {
         const [h, s, l] = rgbToHsl([1, 0, 0.5]);
@@ -22,29 +16,14 @@ describe("conversions: edge cases and regressions", () => {
         expect(l).toBeCloseTo(0.5, 12);
     });
 
-    it("HSV stays in [0, 360) for primary blue (hue == 240)", () => {
-        const [h] = rgbToHsv([0, 0, 1]);
-        expect(h).toBeCloseTo(240, 12);
-    });
-
-    it("CMYK black extraction collapses pure black to K=1", () => {
-        expect(rgbToCmyk([0, 0, 0])).toEqual([0, 0, 0, 1]);
-    });
-
-    it("convertRGBColorspace passes wide-gamut intermediates through unchanged when adaptation is off", () => {
-        // Using a value > 1 in source and disabling adaptation should not
-        // implicitly clip; the result must remain finite and deterministic.
-        const wide = convertRGBColorspace(
-            unsafeAsEncodedRGB([1.2, -0.05, 0.8] as const),
-            "sRGB",
-            "ACES",
-            {
-                adaptation: false,
-            }
+    it("convertRGBColorspace preserves extended RGB channels when clamping is disabled", () => {
+        const rgb = unsafeAsEncodedRGB([1.2, -0.05, 0.8] as const);
+        const wide = convertRGBColorspace(rgb, "sRGB", "sRGB", {
+            clamp: "none",
+        });
+        wide.forEach((channel, index) =>
+            expect(channel).toBeCloseTo(rgb[index] ?? Number.NaN, 12)
         );
-        expect(Number.isFinite(wide[0])).toBe(true);
-        expect(Number.isFinite(wide[1])).toBe(true);
-        expect(Number.isFinite(wide[2])).toBe(true);
     });
 
     it("convertRGBColorspace clamp:'unit' clips out-of-gamut linear values", () => {

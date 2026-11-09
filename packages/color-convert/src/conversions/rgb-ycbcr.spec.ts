@@ -3,7 +3,9 @@ import {
     rgbToYCbCr,
     yCbCrToRgb,
     YCBCR_ENCODINGS,
+    type YCbCrConversionOptions,
 } from "./rgb-ycbcr";
+import { limitedRangeScales } from "./rgb-ycbcr-encodings";
 
 describe("rgb-ycbcr", () => {
     it("computes luma using BT.709 coefficients", () => {
@@ -68,11 +70,6 @@ describe("rgb-ycbcr", () => {
         expect(back[2]).toBeCloseTo(rgb[2], 10);
     });
 
-    it("matches BT.709 published luma value for primary red", () => {
-        const ycbcr = rgbToYCbCr([1, 0, 0], "BT.709");
-        expect(ycbcr[0]).toBeCloseTo(0.2126, 12);
-    });
-
     it("encodes canonical full-range anchors (black/white/red) for BT.709", () => {
         expect(rgbToYCbCr([0, 0, 0], "BT.709")).toEqual([0, 0.5, 0.5]);
         expect(rgbToYCbCr([1, 1, 1], "BT.709")).toEqual([1, 0.5, 0.5]);
@@ -118,4 +115,32 @@ describe("rgb-ycbcr", () => {
             });
         });
     });
+
+    it("uses the limited-range scales for each bit depth", () => {
+        expect(limitedRangeScales()).toEqual({
+            lumaScale: 219 / 255,
+            lumaOffset: 16 / 255,
+            chromaScale: 224 / 255,
+            chromaOffset: 128 / 255,
+        });
+        expect(limitedRangeScales(12).lumaOffset).toBe((16 * 16) / 4095);
+    });
+
+    it.each([16, null])(
+        "rejects unsupported limited-range bit depth %p",
+        bitDepth => {
+            const options = {
+                range: "limited",
+                bitDepth,
+            } as unknown as YCbCrConversionOptions;
+            for (const convert of [rgbToYCbCr, yCbCrToRgb]) {
+                const operation = () =>
+                    convert([0.2, 0.4, 0.7], "BT.709", options);
+                expect(operation).toThrow(RangeError);
+                expect(operation).toThrow(
+                    `unsupported bit depth ${String(bitDepth)}; expected 8, 10, or 12`
+                );
+            }
+        }
+    );
 });

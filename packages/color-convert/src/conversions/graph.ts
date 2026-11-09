@@ -24,7 +24,27 @@ export type ColorModelId =
     | "HSV"
     | "CMYK"
     | "YCbCr";
-export type DomainId = "unit";
+/**
+ * Nominal channel conventions at a graph node. The pipeline does not rescale
+ * or validate these ranges; unclamped conversions can produce extended values.
+ *
+ * - `"unit"` — every channel in `[0, 1]` (RGB encoded/linear, CMYK; YCbCr full
+ *   range: `Y in [0, 1]`, `Cb/Cr in [0, 1]` centred at 0.5);
+ * - `"xyz"` — CIE XYZ scaled so that the white has `Y = 1`;
+ * - `"lab"` — CIE `L in [0, 100]`, `a`/`b` unbounded;
+ * - `"lch"` — CIE `L in [0, 100]`, `C >= 0`, `h` in degrees `[0, 360)`;
+ * - `"oklab"` — `L in [0, 1]`, `a`/`b` unbounded;
+ * - `"oklch"` — `L in [0, 1]`, `C >= 0`, `h` in degrees `[0, 360)`;
+ * - `"hue-unit"` — HSL / HSV: `h` in degrees `[0, 360)`, the rest in `[0, 1]`.
+ */
+export type DomainId =
+    | "unit"
+    | "xyz"
+    | "lab"
+    | "lch"
+    | "oklab"
+    | "oklch"
+    | "hue-unit";
 export interface ConversionNode {
     id: ColorEncodingId;
     model: ColorModelId;

@@ -33,6 +33,12 @@ describe("oklabToOklch", () => {
 });
 
 describe("oklchToOklab", () => {
+    it.each([0, 0.1])("treats a missing hue as zero at chroma %s", chroma => {
+        expect(
+            oklchToOklab(unsafeAsOklch([0.5, chroma, Number.NaN] as const))
+        ).toEqual([0.5, chroma, 0]);
+    });
+
     it("is the polar inverse for representative hues", () => {
         const oklab = oklchToOklab(unsafeAsOklch([0.7, 0.2, 120] as const));
         expect(oklab[0]).toBe(0.7);

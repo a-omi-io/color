@@ -39,7 +39,7 @@ describe("matrixChromaticAdaptationVonKries", () => {
         expect(adapted[2]).toBeCloseTo(xyz[2] * (0.9 / 1.1), 12);
     });
 
-    it("matches Bradford D65->D50 published reference to 4 decimals", () => {
+    it("matches the CSS Color 4 D65_to_D50 matrix to 1e-15", () => {
         const d65 = getWhitepoint("D65").XYZ as [number, number, number];
         const d50 = getWhitepoint("D50").XYZ as [number, number, number];
         const matrix = matrixChromaticAdaptationVonKries(
@@ -47,14 +47,19 @@ describe("matrixChromaticAdaptationVonKries", () => {
             d50,
             CHROMATIC_ADAPTATION_TRANSFORMS.Bradford
         );
-        expect(matrix[0][0]).toBeCloseTo(1.0478, 4);
-        expect(matrix[0][1]).toBeCloseTo(0.0229, 4);
-        expect(matrix[0][2]).toBeCloseTo(-0.0501, 4);
-        expect(matrix[1][0]).toBeCloseTo(0.0295, 4);
-        expect(matrix[1][1]).toBeCloseTo(0.9905, 4);
-        expect(matrix[1][2]).toBeCloseTo(-0.017, 4);
-        expect(matrix[2][0]).toBeCloseTo(-0.0092, 4);
-        expect(matrix[2][1]).toBeCloseTo(0.015, 4);
-        expect(matrix[2][2]).toBeCloseTo(0.7521, 4);
+        const css = [
+            [1.0479297925449969, 0.022946870601609652, -0.05019226628920524],
+            [0.02962780877005599, 0.9904344267538799, -0.017073799063418826],
+            [-0.009243040646204504, 0.015055191490298152, 0.7518742814281371],
+        ];
+        expect(matrix).toHaveLength(3);
+        matrix.forEach((row, i) => {
+            expect(row).toHaveLength(3);
+            row.forEach((value, j) =>
+                expect(
+                    Math.abs(value - (css[i]?.[j] ?? Number.NaN))
+                ).toBeLessThanOrEqual(1e-15)
+            );
+        });
     });
 });

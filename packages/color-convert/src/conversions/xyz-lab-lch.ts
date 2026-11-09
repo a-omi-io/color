@@ -5,7 +5,10 @@
  *
  * Achromatic convention: when `C <= EPSILON_CHROMA` the hue is undefined,
  * and `labToLCh` reports it as `0` (same "powerless hue" idea as CSS
- * `lch()`). `lChToLab` accepts any hue angle; `cos`/`sin` wrap it implicitly.
+ * `lch()`). The threshold is the tiny `EPSILON_CHROMA = 1e-9` rather than
+ * CSS's `0.0015`. `lChToLab` accepts any hue angle (`cos`/`sin` wrap
+ * it); a missing (`NaN`) hue counts as `0`. A negative chroma is clamped to `0`,
+ * as CSS Color 4 clamps it at parse time.
  */
 
 import { EPSILON_CHROMA } from "@omi-io/color-core/constants";
@@ -26,7 +29,9 @@ export function labToLCh(lab: Lab): LCh {
 }
 
 export function lChToLab(lch: LCh): Lab {
-    const [lightness, chroma, hue] = lch;
+    const [lightness, rawChroma, rawHue] = lch;
+    const chroma = rawChroma < 0 ? 0 : rawChroma;
+    const hue = Number.isNaN(rawHue) ? 0 : rawHue;
     const hueRadians = hue / DEGREES_PER_RADIAN;
     return unsafeAsLab([
         lightness,

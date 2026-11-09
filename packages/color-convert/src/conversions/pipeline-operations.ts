@@ -1,5 +1,4 @@
-import { chromaticallyAdaptXYZ } from "../adaptation";
-import { getWhitepoint, RGB_COLORSPACES } from "@omi-io/color-datasets";
+import { RGB_COLORSPACES } from "@omi-io/color-datasets";
 import type {
     HSL,
     HSV,
@@ -16,7 +15,7 @@ import type {
     Oklch,
     XYZ,
 } from "@omi-io/color-models";
-import { asCMYK, asVec3, cielabAdaptationOptions } from "./pipeline-helpers";
+import { adaptLabWhite, asCMYK, asVec3, D50, D65 } from "./pipeline-helpers";
 import { oklabToOklch, oklchToOklab } from "./oklab-oklch";
 import { cmykToRgb, rgbToCmyk } from "./rgb-cmyk";
 import { hslToRgb, rgbToHsl } from "./rgb-hsl";
@@ -33,8 +32,8 @@ export function applyConversionOperation(
     options?: RGBColorspaceConversionOptions
 ): ReadonlyArray<number> {
     const sRgb = RGB_COLORSPACES.sRGB;
-    const d65 = getWhitepoint("D65").XYZ ?? [0.95047, 1, 1.08883];
-    const d50 = getWhitepoint("D50").XYZ ?? [0.96422, 1, 0.82521];
+    const d65 = D65.XYZ;
+    const d50 = D50.XYZ;
     switch (operation) {
         case "decodeRGB":
             return decodeRGB(asVec3<EncodedRGB>(value), sRgb.transfer);
@@ -45,19 +44,9 @@ export function applyConversionOperation(
         case "xyzToRGB":
             return xyzToRGB(asVec3<XYZ>(value), sRgb.matrixXYZToRGB);
         case "adaptD65ToD50":
-            return chromaticallyAdaptXYZ(
-                asVec3<XYZ>(value),
-                d65,
-                d50,
-                cielabAdaptationOptions(options)
-            );
+            return adaptLabWhite(asVec3<XYZ>(value), d65, d50, options);
         case "adaptD50ToD65":
-            return chromaticallyAdaptXYZ(
-                asVec3<XYZ>(value),
-                d50,
-                d65,
-                cielabAdaptationOptions(options)
-            );
+            return adaptLabWhite(asVec3<XYZ>(value), d50, d65, options);
         case "xyzToLabD50":
             return xyzToLab(asVec3<XYZ>(value), d50);
         case "labToXYZD50":

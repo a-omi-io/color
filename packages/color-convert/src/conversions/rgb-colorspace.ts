@@ -1,27 +1,19 @@
 import {
-    clampUnit,
     DEFAULTS,
     type RGBColorspaceConversionOptions,
     type RGBColorspaceId,
 } from "@omi-io/color-core";
-import { RGB_COLORSPACES } from "@omi-io/color-datasets/rgb-colorspaces";
-import {
-    unsafeAsLinearRGB,
-    type EncodedRGB,
-    type LinearRGB,
-} from "@omi-io/color-models";
+import { chromaticityToXYZ, RGB_COLORSPACES } from "@omi-io/color-datasets";
+import type { EncodedRGB } from "@omi-io/color-models";
 import { chromaticallyAdaptXYZ } from "../adaptation";
+import { clampLinearRGB, whiteAdaptationOptions } from "./pipeline-helpers";
 import { decodeRGB, encodeRGB, rgbToXYZ, xyzToRGB } from "./rgb-xyz";
-import { xyToXYZ } from "./xyz-xyy";
 
-function clampLinearRGB(rgb: LinearRGB): LinearRGB {
-    return unsafeAsLinearRGB([
-        clampUnit(rgb[0]),
-        clampUnit(rgb[1]),
-        clampUnit(rgb[2]),
-    ] as const);
-}
-
+/**
+ * Re-encode RGB between colorspaces, using Bradford for differing whites
+ * by default (CSS Color 4 §10.12). `options.adaptation.transform` overrides
+ * the transform; `adaptation: false` skips adaptation.
+ */
 export function convertRGBColorspace(
     rgb: EncodedRGB,
     source: RGBColorspaceId = DEFAULTS.rgbColorspace,
@@ -35,14 +27,15 @@ export function convertRGBColorspace(
     const sameWhitepoint =
         src.whitepoint[0] === dst.whitepoint[0] &&
         src.whitepoint[1] === dst.whitepoint[1];
+    const adaptation = whiteAdaptationOptions(options);
     const xyzTargetWhite =
-        sameWhitepoint || options?.adaptation === false
+        sameWhitepoint || adaptation === undefined
             ? xyzSourceWhite
             : chromaticallyAdaptXYZ(
                   xyzSourceWhite,
-                  xyToXYZ(src.whitepoint, 1),
-                  xyToXYZ(dst.whitepoint, 1),
-                  options?.adaptation
+                  chromaticityToXYZ(src.whitepoint),
+                  chromaticityToXYZ(dst.whitepoint),
+                  adaptation
               );
     const targetLinear = xyzToRGB(xyzTargetWhite, dst.matrixXYZToRGB);
     const clamped =

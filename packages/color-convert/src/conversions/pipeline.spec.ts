@@ -1,17 +1,59 @@
+import standardReference from "./__fixtures__/css-color-4.json";
 import { chromaticallyAdaptXYZ, CIELAB_D50_ADAPTATION } from "../adaptation";
 import { getWhitepoint, RGB_COLORSPACES } from "@omi-io/color-datasets";
-import { unsafeAsEncodedRGB } from "@omi-io/color-models";
+import { unsafeAsEncodedRGB, unsafeAsLinearRGB } from "@omi-io/color-models";
 import { rgbToOklab } from "./rgb-oklab";
-import { decodeRGB, rgbToXYZ } from "./rgb-xyz";
+import { decodeRGB, encodeRGB, rgbToXYZ } from "./rgb-xyz";
 import { xyzToLab } from "./xyz-lab";
 import { convertByPipeline } from "./pipeline";
 
 describe("convertByPipeline", () => {
+    it.each(["unit", "target-gamut"] as const)(
+        "clamps the final sRGB channels with clamp: %s",
+        clamp => {
+            const encoded = convertByPipeline(
+                [-0.1, 0.5, 1.1],
+                "sRGB linear",
+                "sRGB encoded",
+                { clamp, returnIntermediate: true }
+            );
+            expect(encoded.value[0]).toBe(0);
+            expect(encoded.value[1]).toBeCloseTo(0.7353569830524495, 12);
+            expect(encoded.value[2]).toBeCloseTo(1, 12);
+            expect(encoded.trace?.targetLinear).toEqual([0, 0.5, 1]);
+
+            const linear = convertByPipeline(
+                [-0.1, 0.5, 1.1],
+                "sRGB encoded",
+                "sRGB linear",
+                { clamp, returnIntermediate: true }
+            );
+            expect(linear.value[0]).toBe(0);
+            expect(linear.value[1]).toBeCloseTo(0.21404114048223255, 12);
+            expect(linear.value[2]).toBe(1);
+            expect(linear.trace?.sourceLinear).toEqual(
+                decodeRGB(
+                    unsafeAsEncodedRGB([-0.1, 0.5, 1.1]),
+                    RGB_COLORSPACES.sRGB.transfer
+                )
+            );
+
+            const extended = convertByPipeline(
+                [-0.1, 0.5, 1.1],
+                "sRGB linear",
+                "sRGB encoded",
+                { clamp: "none" }
+            );
+            expect(extended.value[0]).toBeLessThan(0);
+            expect(extended.value[2]).toBeGreaterThan(1);
+        }
+    );
+
     it("matches the manual sRGB encoded -> Lab D50 chain", () => {
         const rgb = [0.2, 0.4, 0.7] as const;
         const sRgb = RGB_COLORSPACES.sRGB;
-        const d65 = getWhitepoint("D65").XYZ ?? [0.95047, 1, 1.08883];
-        const d50 = getWhitepoint("D50").XYZ ?? [0.96422, 1, 0.82521];
+        const d65 = getWhitepoint("D65").XYZ as [number, number, number];
+        const d50 = getWhitepoint("D50").XYZ as [number, number, number];
         const linear = decodeRGB(unsafeAsEncodedRGB(rgb), sRgb.transfer);
         const xyz65 = rgbToXYZ(linear, sRgb.matrixRGBToXYZ);
         const xyz50 = chromaticallyAdaptXYZ(
@@ -27,18 +69,24 @@ describe("convertByPipeline", () => {
         expect(result.value[2]).toBeCloseTo(expected[2], 12);
     });
 
-    // The D50 leg follows ICC / CSS Color 4 (Bradford), NOT
-    // `DEFAULTS.chromaticAdaptationTransform` (CAT02) — see
-    // `CIELAB_D50_ADAPTATION`. `blue` is the fixture published in CSS Color
-    // Module Level 4 §「sample code」: `lab(29.5683% 68.2986 -112.0294)`.
     describe("CIELAB D50 leg — adaptation transform", () => {
         const BLUE = [0, 0, 1] as const;
 
-        it("defaults to Bradford: `blue` matches the CSS Color 4 published Lab", () => {
+        it("defaults to Bradford: blue matches independently evaluated Lab D50", () => {
             const lab = convertByPipeline([...BLUE], "sRGB encoded", "Lab D50");
-            expect(lab.value[0]).toBeCloseTo(29.5683, 2);
-            expect(lab.value[1]).toBeCloseTo(68.2986, 2);
-            expect(lab.value[2]).toBeCloseTo(-112.0294, 2);
+            const css =
+                standardReference.srgb.find(
+                    row =>
+                        row.rgb8[0] === 0 &&
+                        row.rgb8[1] === 0 &&
+                        row.rgb8[2] === 255
+                )?.labD50 ?? [];
+            expect(css).toHaveLength(3);
+            lab.value.forEach((v, i) =>
+                expect(
+                    Math.abs(v - (css[i] ?? Number.NaN))
+                ).toBeLessThanOrEqual(1e-9)
+            );
         });
 
         it("still honours an explicit transform over the CIELAB default", () => {
@@ -89,6 +137,22 @@ describe("convertByPipeline", () => {
         expect(result.trace?.sourceEncoded).toEqual([0.1, 0.2, 0.3]);
         expect(result.trace?.sourceLinear).toBeDefined();
         expect(result.trace?.xyzSourceWhite).toBeDefined();
+    });
+
+    it("traces the linear input before a direct sRGB encoding", () => {
+        const linear = unsafeAsLinearRGB([0.1, 0.2, 0.3] as const);
+        const encoded = encodeRGB(linear, RGB_COLORSPACES.sRGB.transfer);
+        const result = convertByPipeline(
+            linear,
+            "sRGB linear",
+            "sRGB encoded",
+            { returnIntermediate: true }
+        );
+        expect(result.value).toEqual(encoded);
+        expect(result.trace).toEqual({
+            targetLinear: linear,
+            targetEncoded: encoded,
+        });
     });
 
     it("matches the manual sRGB encoded -> Oklab chain", () => {

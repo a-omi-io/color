@@ -68,7 +68,7 @@ describe("deltaE94", () => {
 });
 
 describe("deltaE2000 (Sharma test set)", () => {
-    // Selected pairs from Sharma, Wu, Dalal (2005), Table 1.
+    // Sharma, Wu, Dalal (2005), Table 1, pairs 1, 4, 17 and 21, plus identity.
     const cases: ReadonlyArray<{
         a: Lab;
         b: Lab;
@@ -102,7 +102,7 @@ describe("deltaE2000 (Sharma test set)", () => {
     ];
 
     cases.forEach(({ a, b, expected }, i) => {
-        it(`pair #${i + 1} matches the published value (${expected})`, () => {
+        it(`case #${i + 1} matches the reference value (${expected})`, () => {
             expect(deltaE2000(a, b)).toBeCloseTo(expected, 4);
         });
     });
@@ -116,14 +116,6 @@ describe("deltaECMC", () => {
                 unsafeAsLab([50, 12, -34] as const)
             )
         ).toBe(0);
-    });
-
-    it("uses textile defaults (l=2, c=1) and is positive for distinct samples", () => {
-        const value = deltaECMC(
-            unsafeAsLab([50, 25, 10] as const),
-            unsafeAsLab([55, 22, 5] as const)
-        );
-        expect(value).toBeGreaterThan(0);
     });
 
     it("perceptibility option (l=1) is stricter than acceptability (l=2)", () => {

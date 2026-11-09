@@ -1,10 +1,7 @@
 import type { RGB, YCbCr } from "@omi-io/color-core/types";
 import { clampUnit } from "@omi-io/color-core/normalization";
 import {
-    LIMITED_CHROMA_OFFSET,
-    LIMITED_CHROMA_SCALE,
-    LIMITED_LUMA_OFFSET,
-    LIMITED_LUMA_SCALE,
+    limitedRangeScales,
     resolveYCbCrEncoding,
 } from "./rgb-ycbcr-encodings";
 import type {
@@ -33,11 +30,15 @@ export function rgbToLuma(
 /**
  * Encode unit-domain RGB into YCbCr per the chosen ITU-R standard.
  *
- * Output convention (matches colour-science `RGB_to_YCbCr`):
+ * Output convention:
  * - `range: "full"` (default) — `Y in [0, 1]`, `Cb/Cr in [0, 1]` centred at
- *   `0.5` for achromatic input.
- * - `range: "limited"` — `Y` mapped into `[16/255, 235/255]`, `Cb/Cr` into
- *   `[16/255, 240/255]` with `128/255` neutral.
+ *   `0.5` for achromatic input. This is an offset of `0.5` from the signed
+ *   chroma differences `[-0.5, 0.5]`; it is a unit-domain API convention.
+ * - `range: "limited"` — legal-range codes normalised by `2^n − 1`
+ *   (`bitDepth`, default 8): `Y in [16, 235]/255`, `Cb/Cr in [16, 240]/255`
+ *   with `128/255` neutral at 8 bits.
+ *
+ * RGB inputs are clamped to `[0, 1]`.
  */
 export function rgbToYCbCr(
     rgb: RGB,
@@ -51,10 +52,11 @@ export function rgbToYCbCr(
     const cbLin = (b - yLin) / (2 * (1 - mode.kb));
     const crLin = (r - yLin) / (2 * (1 - mode.kr));
     if (range === "full") return [yLin, cbLin + 0.5, crLin + 0.5];
+    const k = limitedRangeScales(options?.bitDepth);
     return [
-        LIMITED_LUMA_SCALE * yLin + LIMITED_LUMA_OFFSET,
-        LIMITED_CHROMA_SCALE * cbLin + LIMITED_CHROMA_OFFSET,
-        LIMITED_CHROMA_SCALE * crLin + LIMITED_CHROMA_OFFSET,
+        k.lumaScale * yLin + k.lumaOffset,
+        k.chromaScale * cbLin + k.chromaOffset,
+        k.chromaScale * crLin + k.chromaOffset,
     ];
 }
 
@@ -73,9 +75,10 @@ export function yCbCrToRgb(
         cbLin = ycbcr[1] - 0.5;
         crLin = ycbcr[2] - 0.5;
     } else {
-        yLin = (ycbcr[0] - LIMITED_LUMA_OFFSET) / LIMITED_LUMA_SCALE;
-        cbLin = (ycbcr[1] - LIMITED_CHROMA_OFFSET) / LIMITED_CHROMA_SCALE;
-        crLin = (ycbcr[2] - LIMITED_CHROMA_OFFSET) / LIMITED_CHROMA_SCALE;
+        const k = limitedRangeScales(options?.bitDepth);
+        yLin = (ycbcr[0] - k.lumaOffset) / k.lumaScale;
+        cbLin = (ycbcr[1] - k.chromaOffset) / k.chromaScale;
+        crLin = (ycbcr[2] - k.chromaOffset) / k.chromaScale;
     }
     const r = yLin + 2 * (1 - mode.kr) * crLin;
     const b = yLin + 2 * (1 - mode.kb) * cbLin;

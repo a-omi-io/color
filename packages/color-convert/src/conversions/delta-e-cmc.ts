@@ -20,8 +20,7 @@
  * - acceptability (`l = 2`, `c = 1`, the textile-industry default)
  *
  * Reference: F. J. J. Clarke, R. McDonald, B. Rigg, "Modification to the
- * JPC79 color-difference formula" (1984); colour-science
- * `colour.difference.delta_E_CMC`.
+ * JPC79 color-difference formula" (1984); ISO 105-J03.
  */
 
 import { wrapHueDegrees } from "@omi-io/color-core/normalization";

@@ -1,5 +1,7 @@
 import { unsafeAsEncodedRGB } from "@omi-io/color-models";
+import { RGB_COLORSPACES } from "@omi-io/color-datasets";
 import { convertRGBColorspace } from "./rgb-colorspace";
+import { decodeRGB, encodeRGB, rgbToXYZ, xyzToRGB } from "./rgb-xyz";
 
 describe("convertRGBColorspace", () => {
     it("is identity for same source and target colorspace", () => {
@@ -16,22 +18,26 @@ describe("convertRGBColorspace", () => {
             "sRGB",
             "ACES"
         );
-        expect(Number.isFinite(converted[0])).toBe(true);
-        expect(Number.isFinite(converted[1])).toBe(true);
-        expect(Number.isFinite(converted[2])).toBe(true);
+        // Bradford maps source white to target white; ACES uses linear RGB.
+        // The remaining scalar is the IEC sRGB decode of 0.5.
+        converted.forEach(channel =>
+            expect(channel).toBeCloseTo(0.21404114048223255, 12)
+        );
     });
 
     it("can skip adaptation when whitepoints differ", () => {
-        const converted = convertRGBColorspace(
-            unsafeAsEncodedRGB([0.5, 0.5, 0.5] as const),
-            "sRGB",
-            "ACES",
-            {
-                adaptation: false,
-            }
+        const rgb = unsafeAsEncodedRGB([0.5, 0.5, 0.5] as const);
+        const converted = convertRGBColorspace(rgb, "sRGB", "ACES", {
+            adaptation: false,
+        });
+        const xyz = rgbToXYZ(
+            decodeRGB(rgb, RGB_COLORSPACES.sRGB.transfer),
+            RGB_COLORSPACES.sRGB.matrixRGBToXYZ
         );
-        expect(Number.isFinite(converted[0])).toBe(true);
-        expect(Number.isFinite(converted[1])).toBe(true);
-        expect(Number.isFinite(converted[2])).toBe(true);
+        const withoutAdaptation = encodeRGB(
+            xyzToRGB(xyz, RGB_COLORSPACES.ACES.matrixXYZToRGB),
+            RGB_COLORSPACES.ACES.transfer
+        );
+        expect(converted).toEqual(withoutAdaptation);
     });
 });

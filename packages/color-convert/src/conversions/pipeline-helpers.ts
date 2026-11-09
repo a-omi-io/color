@@ -2,39 +2,55 @@ import type {
     CMYK,
     ChromaticAdaptationOptions,
     RGBColorspaceConversionOptions,
+    Vec3,
+    Whitepoint,
+    xy,
 } from "@omi-io/color-core/types";
-import { CIELAB_D50_ADAPTATION } from "../adaptation";
+import { getWhitepoint } from "@omi-io/color-datasets";
+import { clampUnit } from "@omi-io/color-core/normalization";
+import { chromaticallyAdaptXYZ } from "../adaptation";
+import { WHITE_ADAPTATION_TRANSFORM } from "../adaptation/chromatic-adaptation";
+import {
+    unsafeAsLinearRGB,
+    type LinearRGB,
+    type XYZ,
+} from "@omi-io/color-models";
 
-export function adaptationOptions(
-    options?: RGBColorspaceConversionOptions
-): ChromaticAdaptationOptions | undefined {
-    return options?.adaptation === false ? undefined : options?.adaptation;
+export function clampLinearRGB(rgb: LinearRGB): LinearRGB {
+    return unsafeAsLinearRGB([
+        clampUnit(rgb[0]),
+        clampUnit(rgb[1]),
+        clampUnit(rgb[2]),
+    ] as const);
 }
 
+function requireWhitepoint(whitepoint: Whitepoint): { xy: xy; XYZ: Vec3 } {
+    if (!whitepoint.xy || !whitepoint.XYZ) {
+        throw new Error(
+            `color-datasets: whitepoint ${whitepoint.name} lacks xy or XYZ`
+        );
+    }
+    return { xy: whitepoint.xy, XYZ: whitepoint.XYZ };
+}
+
+export const D65 = requireWhitepoint(getWhitepoint("D65"));
+export const D50 = requireWhitepoint(getWhitepoint("D50"));
+
 /**
- * Adaptation options for the graph's D65 ↔ D50 edges: the caller's, with the
- * transform defaulting to `CIELAB_D50_ADAPTATION` (Bradford, per ICC / CSS
- * Color 4) rather than to `DEFAULTS.chromaticAdaptationTransform`. Any other
- * field the caller passed (`sourceWhite`/`targetWhite`) is preserved.
+ * Whitepoint adaptation uses the shared Bradford policy.
+ * Explicit caller options take precedence; false disables adaptation.
  */
-export function cielabAdaptationOptions(
+export function whiteAdaptationOptions(
     options?: RGBColorspaceConversionOptions
-): ChromaticAdaptationOptions {
-    const provided = adaptationOptions(options);
+): ChromaticAdaptationOptions | undefined {
+    const provided = options?.adaptation;
+    if (provided === false) return undefined;
     return provided?.transform === undefined
-        ? { ...provided, ...CIELAB_D50_ADAPTATION }
+        ? { ...provided, transform: WHITE_ADAPTATION_TRANSFORM }
         : provided;
 }
 
-/**
- * Narrow a length-3 channel array into a tuple type used by the scalar APIs.
- * The pipeline keeps the runtime arrays loosely typed (`ReadonlyArray<number>`)
- * so the declarative graph can stitch heterogeneous spaces together; this
- * helper validates the shape at the boundary instead of trusting the cast.
- */
-export function asVec3<T extends ReadonlyArray<number>>(
-    value: ReadonlyArray<number>
-): T {
+export function asVec3<T extends Vec3>(value: ReadonlyArray<number>): T {
     if (value.length !== 3) {
         throw new Error(
             `pipeline: expected 3-channel input, got ${value.length}`
@@ -50,4 +66,15 @@ export function asCMYK(value: ReadonlyArray<number>): CMYK {
         );
     }
     return value as unknown as CMYK;
+}
+
+export function adaptLabWhite(
+    xyz: XYZ,
+    sourceWhite: Vec3,
+    targetWhite: Vec3,
+    options?: RGBColorspaceConversionOptions
+): XYZ {
+    const adaptation = whiteAdaptationOptions(options);
+    if (adaptation === undefined) return xyz;
+    return chromaticallyAdaptXYZ(xyz, sourceWhite, targetWhite, adaptation);
 }

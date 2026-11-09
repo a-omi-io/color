@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-convert",
   "scopeCommitName": "@:convert",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Composable color space conversions, chromatic adaptation, and color-difference metrics built on core types and reference datasets.",
   "keywords": [
     "color",
@@ -48,9 +48,9 @@
     "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@omi-io/color-core": "^0.1.0",
-    "@omi-io/color-datasets": "^0.1.0",
-    "@omi-io/color-models": "^0.2.0"
+    "@omi-io/color-core": "^0.2.0",
+    "@omi-io/color-datasets": "^0.2.0",
+    "@omi-io/color-models": "^0.3.0"
   },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",

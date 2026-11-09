@@ -1,20 +1,36 @@
 import { CHROMATIC_ADAPTATION_TRANSFORMS } from "@omi-io/color-datasets/chromatic-adaptation";
+import { multiplyMatrix3x3Vector3 } from "@omi-io/color-core/math";
 import { unsafeAsXYZ } from "@omi-io/color-models";
 import { chromaticallyAdaptXYZ } from "./chromatic-adaptation";
 import { matrixChromaticAdaptationVonKries } from "./von-kries";
 
 describe("chromaticallyAdaptXYZ", () => {
-    it("uses CAT02 when no transform is provided", () => {
+    it("uses Bradford by default and permits explicit CAT02", () => {
         const xyz = unsafeAsXYZ([0.31, 0.42, 0.19] as const);
         const sourceWhite = [0.95047, 1, 1.08883] as const;
         const targetWhite = [0.96422, 1, 0.82521] as const;
         const implicit = chromaticallyAdaptXYZ(xyz, sourceWhite, targetWhite);
         const explicit = chromaticallyAdaptXYZ(xyz, sourceWhite, targetWhite, {
-            transform: "CAT02",
+            transform: "Bradford",
         });
         expect(implicit[0]).toBeCloseTo(explicit[0], 12);
         expect(implicit[1]).toBeCloseTo(explicit[1], 12);
         expect(implicit[2]).toBeCloseTo(explicit[2], 12);
+        const cat02 = chromaticallyAdaptXYZ(xyz, sourceWhite, targetWhite, {
+            transform: "CAT02",
+        });
+        expect(cat02).not.toEqual(implicit);
+        const expectedCat02 = multiplyMatrix3x3Vector3(
+            matrixChromaticAdaptationVonKries(
+                sourceWhite,
+                targetWhite,
+                CHROMATIC_ADAPTATION_TRANSFORMS.CAT02
+            ),
+            xyz
+        );
+        cat02.forEach((channel, index) =>
+            expect(channel).toBeCloseTo(expectedCat02[index] ?? Number.NaN, 12)
+        );
     });
 
     it("keeps xyz unchanged when source and target white are equal", () => {

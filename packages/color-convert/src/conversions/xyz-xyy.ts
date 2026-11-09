@@ -17,9 +17,11 @@
  * - `X + Y + Z === 0` (the canonical "black" stimulus): chromaticity is
  *   mathematically undefined. The function returns `[xFallback, yFallback, Y]`
  *   using either the caller-supplied `fallbackChromaticity` or the default
- *   below. This matches the convention used by `colour-science` and ICC.
+ *   below (D65). Pass `fallbackChromaticity: [0, 0]` for a zero-coordinate
+ *   fallback instead.
  * - `y === 0` in `xyYToXYZ` / `xyToXYZ`: would otherwise divide by zero.
- *   The function returns `[0, 0, 0]` to keep results NaN-free.
+ *   The function returns `[0, Y, 0]` (NaN-free, and `Y` is kept). This is
+ *   our convention for a mathematically undefined inverse.
  */
 
 import type { xy, xyY } from "@omi-io/color-core/types";
@@ -60,21 +62,20 @@ export function xyzToXyY(xyz: XYZ, options?: XyzToXyYOptions): xyY {
 export function xyYToXYZ(xyY: xyY): XYZ {
     const [x, y, Y] = xyY;
     if (y === 0) {
-        return unsafeAsXYZ([0, 0, 0] as const);
+        return unsafeAsXYZ([0, Y, 0] as const);
     }
-    const ratio = Y / y;
-    return unsafeAsXYZ([x * ratio, Y, (1 - x - y) * ratio] as const);
+    // `x * Y / y`, not `x * (Y / y)`: at Y = 1 this is bit for bit the
+    // `chromaticityToXYZ` of @omi-io/color-datasets, so xyToXYZ(white.xy)
+    // equals white.XYZ.
+    return unsafeAsXYZ([(x * Y) / y, Y, ((1 - x - y) * Y) / y] as const);
 }
 
 export function xyToXYZ(xy: xy, Y: number = 1): XYZ {
     const [x, y] = xy;
-    if (y === 0) {
-        return unsafeAsXYZ([0, 0, 0] as const);
-    }
-    const ratio = Y / y;
-    return unsafeAsXYZ([x * ratio, Y, (1 - x - y) * ratio] as const);
+    return xyYToXYZ([x, y, Y]);
 }
 
+/** Chromaticity coordinate `z = 1 - x - y` (lower-case z, not tristimulus `Z`). */
 export function xyToZ(xy: xy): number {
     return 1 - xy[0] - xy[1];
 }

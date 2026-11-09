@@ -39,6 +39,12 @@ describe("labToLCh", () => {
 });
 
 describe("lChToLab", () => {
+    it.each([0, 10])("treats a missing hue as zero at chroma %s", chroma => {
+        expect(
+            lChToLab(unsafeAsLCh([50, chroma, Number.NaN] as const))
+        ).toEqual([50, chroma, 0]);
+    });
+
     it("is the polar inverse for representative hues", () => {
         const lab = lChToLab(unsafeAsLCh([70, 20, 120] as const));
         expect(lab[0]).toBe(70);

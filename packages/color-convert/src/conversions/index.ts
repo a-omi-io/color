@@ -12,7 +12,7 @@ export { xyzToLab, labToXYZ } from "./xyz-lab";
 export { labToLCh, lChToLab } from "./xyz-lab-lch";
 export { xyzToOklab, oklabToXYZ } from "./xyz-oklab";
 export { oklabToOklch, oklchToOklab } from "./oklab-oklch";
-export { rgbToOklab, oklabToRgb } from "./rgb-oklab";
+export { rgbToOklab, oklabToRgb, oklabToLinearRgb } from "./rgb-oklab";
 export { rgbToOklch, oklchToRgb } from "./rgb-oklch";
 
 export {
@@ -28,7 +28,7 @@ export {
 
 export { decodeRGB, encodeRGB, rgbToXYZ, xyzToRGB } from "./rgb-xyz";
 export { convertRGBColorspace } from "./rgb-colorspace";
-export { rgbToHsl, hslToRgb } from "./rgb-hsl";
+export { rgbToHsl, hslToRgb, type HslToRgbOptions } from "./rgb-hsl";
 export { rgbToHsv, hsvToRgb } from "./rgb-hsv";
 export { rgbToCmyk, cmykToRgb, type RgbToCmykOptions } from "./rgb-cmyk";
 export {

@@ -19,8 +19,7 @@
  * Default application is "graphic arts" (`KL=KC=KH=1`, `K1=0.045`,
  * `K2=0.015`); textiles use `KL=2`, `K1=0.048`, `K2=0.014`.
  *
- * Reference: CIE 116-1995; mirrored in colour-science
- * `colour.difference.delta_E_CIE1994`.
+ * Reference: CIE 116-1995, Industrial Colour-Difference Evaluation.
  */
 
 import type { Lab } from "@omi-io/color-models";

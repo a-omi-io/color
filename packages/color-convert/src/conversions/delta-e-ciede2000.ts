@@ -1,8 +1,7 @@
 /**
  * CIEDE2000 color difference (a.k.a. "ΔE00"; CIE 142-2001).
  *
- * Implementation follows Sharma, Wu, Dalal (2005). Verified against pairs 1,
- * 4 and 9 of the canonical Sharma test set in `delta-e.spec.ts`.
+ * Implementation follows Sharma, Wu, Dalal (2005).
  */
 
 import type { Lab } from "@omi-io/color-models";

@@ -1,6 +1,10 @@
 import type { xy, xyY } from "@omi-io/color-core";
 import { STANDARD_OBSERVERS } from "@omi-io/color-core";
-import { CHROMATICITY_COORDINATES } from "@omi-io/color-datasets";
+import {
+    CHROMATICITY_COORDINATES,
+    chromaticityToXYZ,
+    WHITEPOINTS,
+} from "@omi-io/color-datasets";
 import { unsafeAsXYZ } from "@omi-io/color-models";
 import { xyToXYZ, xyToZ, xyYToXYZ, xyzToXyY } from "./xyz-xyy";
 
@@ -40,9 +44,13 @@ describe("xyzToXyY", () => {
 });
 
 describe("xyYToXYZ", () => {
-    it("returns black when y === 0 instead of dividing by zero", () => {
+    // Native colour-science returns zero XYZ for y=0; this API preserves Y.
+    it("returns [0, Y, 0] when y === 0 instead of dividing by zero", () => {
         expect(xyYToXYZ([0.3127, 0, 1])).toEqual(
-            unsafeAsXYZ([0, 0, 0] as const)
+            unsafeAsXYZ([0, 1, 0] as const)
+        );
+        expect(xyYToXYZ([0.3127, 0, 0.25])).toEqual(
+            unsafeAsXYZ([0, 0.25, 0] as const)
         );
     });
 
@@ -86,8 +94,9 @@ describe("xyToXYZ", () => {
         expect(xyzY100[2]).toBeCloseTo(xyzY1[2] * 100, 10);
     });
 
-    it("returns black if y === 0 (avoids division by zero)", () => {
-        expect(xyToXYZ([0.5, 0], 1)).toEqual([0, 0, 0]);
+    it("returns [0, Y, 0] if y === 0 (avoids division by zero, keeps Y)", () => {
+        expect(xyToXYZ([0.5, 0], 1)).toEqual([0, 1, 0]);
+        expect(xyToXYZ([0.5, 0], 0.4)).toEqual([0, 0.4, 0]);
     });
 
     it("matches legacy/Python fixture for arbitrary xy input", () => {
@@ -103,5 +112,19 @@ describe("xyToZ", () => {
         expect(xyToZ([0.3127, 0.329])).toBeCloseTo(0.3583, 12);
         expect(xyToZ([0, 0])).toBe(1);
         expect(xyToZ([0.5, 0.5])).toBe(0);
+    });
+});
+
+describe("xyToXYZ and the library whites", () => {
+    // Operation order must match the dataset helper for exact whitepoint equality.
+    it("gives every dataset white bit for bit from its xy", () => {
+        Object.values(STANDARD_OBSERVERS).forEach(observer => {
+            Object.values(WHITEPOINTS[observer]).forEach(white => {
+                const chromaticity: xy = white.xy ?? [Number.NaN, Number.NaN];
+                const fromXy = [...xyToXYZ(chromaticity)];
+                expect(fromXy).toEqual([...chromaticityToXYZ(chromaticity)]);
+                expect(fromXy).toEqual([...(white.XYZ ?? [])]);
+            });
+        });
     });
 });

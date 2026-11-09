@@ -29,12 +29,12 @@ export function encodeRGB(
     ] as const);
 }
 
-/** Linear-light RGB in the space of `matrixRGBToXYZ` → absolute XYZ. */
+/** Linear-light RGB → XYZ, with reference white and scale set by the matrix. */
 export function rgbToXYZ(rgb: LinearRGB, matrixRGBToXYZ: Matrix3x3): XYZ {
     return unsafeAsXYZ(multiplyMatrix3x3Vector3(matrixRGBToXYZ, rgb));
 }
 
-/** Absolute XYZ → linear-light RGB for the inverse of `matrixXYZToRGB`. */
+/** XYZ → linear-light RGB; XYZ must use the matrix's reference white and scale. */
 export function xyzToRGB(xyz: XYZ, matrixXYZToRGB: Matrix3x3): LinearRGB {
     return unsafeAsLinearRGB(multiplyMatrix3x3Vector3(matrixXYZToRGB, xyz));
 }

@@ -11,9 +11,9 @@
  * - {@link deltaECMC}   — Clarke / McDonald / Rigg 1984 (textile industry
  *                        l:c=2:1 default; ISO 105-J03).
  *
- * No metric mutates its inputs; all are symmetric in the absolute sense
- * (CIE94, CIEDE2000 and CMC are direction-aware via the C1/h1 terms but
- * `deltaE76` is fully commutative).
+ * No metric mutates its inputs. CIE76 and CIEDE2000 are symmetric; CIE94
+ * and CMC treat the first sample as the reference and can change when the
+ * samples are swapped.
  */
 
 export { deltaE76 } from "./delta-e-cie76";

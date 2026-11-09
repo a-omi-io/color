@@ -11,22 +11,21 @@ export interface YCbCrEncoding {
 
 export interface YCbCrConversionOptions {
     range?: YCbCrRange;
+    /**
+     * Limited-range bit depth (default `8`), ignored for full range. Codes are
+     * normalised by `2^n − 1`: luma is `[16, 235]/255` at 8 bits,
+     * `[64, 940]/1023` at 10, `[256, 3760]/4095` at 12.
+     * Sources: ITU-R BT.709-6 §4.6, BT.2020-2 Table 5.
+     */
+    bitDepth?: 8 | 10 | 12;
 }
 
 /**
- * Built-in YCbCr matrices.
+ * YCbCr matrices, full range (JFIF) by default for unit-RGB round-trips.
+ * Use limited range for SDI/broadcast studio swing (16/235 at 8 bits).
  *
- * The default `range` is `"full"` (a.k.a. JFIF full-swing) because that is
- * what unit-domain RGB inputs round-trip cleanly to/from. Pick
- * `range: "limited"` for SDI/broadcast "studio swing" where the encoded
- * values are mapped into 16/235-style legal-range floats.
- *
- * Sources:
- * - ITU-R BT.601-7 §2.5.1 ("Construction of luminance ... and color-
- *   difference signals").
- * - ITU-R BT.709-6 §3 ("Signal format").
- * - ITU-R BT.2020-2 §3.4 ("Constant luminance signal format"; we ship the
- *   non-constant-luminance YCbCr variant as is conventional).
+ * Sources: ITU-R BT.601-7 §2.5.1, BT.709-6 §3, BT.2020-2 §3.4.
+ * BT.2020 uses the conventional non-constant-luminance variant.
  */
 export const YCBCR_ENCODINGS: Record<YCbCrEncodingId, YCbCrEncoding> = {
     "BT.601": {
@@ -52,10 +51,45 @@ export const YCBCR_ENCODINGS: Record<YCbCrEncodingId, YCbCrEncoding> = {
     },
 };
 
-export const LIMITED_LUMA_SCALE = 219 / 255;
-export const LIMITED_LUMA_OFFSET = 16 / 255;
-export const LIMITED_CHROMA_SCALE = 224 / 255;
-export const LIMITED_CHROMA_OFFSET = 128 / 255;
+export interface LimitedRangeScales {
+    readonly lumaScale: number;
+    readonly lumaOffset: number;
+    readonly chromaScale: number;
+    readonly chromaOffset: number;
+}
+
+function buildLimitedRangeScales(bitDepth: 8 | 10 | 12): LimitedRangeScales {
+    const step = 2 ** (bitDepth - 8);
+    const max = 2 ** bitDepth - 1;
+    return {
+        lumaScale: (219 * step) / max,
+        lumaOffset: (16 * step) / max,
+        chromaScale: (224 * step) / max,
+        chromaOffset: (128 * step) / max,
+    };
+}
+
+const LIMITED_RANGE_SCALES: Readonly<Record<8 | 10 | 12, LimitedRangeScales>> =
+    {
+        8: buildLimitedRangeScales(8),
+        10: buildLimitedRangeScales(10),
+        12: buildLimitedRangeScales(12),
+    };
+
+/**
+ * Limited-range scales for a bit depth, normalised by `2^n − 1` (precomputed).
+ * Throws a RangeError for unsupported bit depths supplied by JavaScript callers.
+ */
+export function limitedRangeScales(
+    bitDepth: 8 | 10 | 12 = 8
+): LimitedRangeScales {
+    if (bitDepth !== 8 && bitDepth !== 10 && bitDepth !== 12) {
+        throw new RangeError(
+            `YCbCr limited range: unsupported bit depth ${String(bitDepth)}; expected 8, 10, or 12.`
+        );
+    }
+    return LIMITED_RANGE_SCALES[bitDepth];
+}
 
 export function resolveYCbCrEncoding(
     encoding: YCbCrEncodingId | YCbCrEncoding

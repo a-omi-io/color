@@ -1,9 +1,6 @@
 /**
- * Direct shortcut between canonical gamma-encoded RGB (unit domain) and
- * Oklch, composing `rgbToOklab`/`oklabToRgb` with `oklabToOklch`/
- * `oklchToOklab` — avoids the 4-5 step manual pipeline composition.
- * `space` defaults to `"sRGB"`; see `rgb-oklab.ts` for the D65 wide-gamut
- * constraint and out-of-gamut policy, both of which apply here unchanged.
+ * Encoded RGB ↔ Oklch, defaulting to sRGB. Uses the adaptation and unclamped
+ * output policies of `rgbToOklab` / `oklabToRgb`.
  */
 
 import { DEFAULTS } from "@omi-io/color-core";

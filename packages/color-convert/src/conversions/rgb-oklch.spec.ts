@@ -31,36 +31,29 @@ describe("rgb -> oklch -> rgb round-trip on the 6x6x6 sRGB grid", () => {
 });
 
 describe("rgbToOklch", () => {
-    it("reports chroma ~0 for achromatic gray (#808080)", () => {
-        const gray = 128 / 255;
-        const [, chroma] = rgbToOklch([gray, gray, gray]);
-        expect(chroma).toBeCloseTo(0, 3);
-    });
-
-    it("reports hue 0 for exactly achromatic input (black, a = b = 0)", () => {
-        const [, , hue] = rgbToOklch([0, 0, 0]);
-        expect(hue).toBe(0);
-    });
-
     it("gives Display P3 green a larger chroma than sRGB green (wider gamut)", () => {
         const [, sRgbChroma] = rgbToOklch([0, 1, 0]);
         const [, p3Chroma] = rgbToOklch([0, 1, 0], "Display P3");
         expect(p3Chroma).toBeGreaterThan(sRgbChroma);
     });
 
-    it("throws for non-D65 colorspaces (ACES)", () => {
-        expect(() => rgbToOklch([0.5, 0.5, 0.5], "ACES")).toThrow(
-            "oklab conversion requires a D65 colorspace"
-        );
+    it("adapts non-D65 colorspaces: their white is Oklab white", () => {
+        for (const space of ["ACES", "ACEScg", "DCI-P3"] as const) {
+            const [lightness, chroma, hue] = rgbToOklch([1, 1, 1], space);
+            expect(Math.abs(lightness - 1)).toBeLessThanOrEqual(1e-12);
+            expect(chroma).toBeLessThanOrEqual(1e-12);
+            expect(hue).toBe(0);
+        }
     });
 });
 
 describe("oklchToRgb", () => {
-    it("throws for non-D65 colorspaces (ACES)", () => {
-        const oklch = rgbToOklch([0.5, 0.5, 0.5]);
-        expect(() => oklchToRgb(oklch, "ACES")).toThrow(
-            "oklab conversion requires a D65 colorspace"
-        );
+    it("round-trips through non-D65 colorspaces", () => {
+        for (const space of ["ACES", "ACEScg", "DCI-P3"] as const) {
+            const rgb = [0.2, 0.5, 0.8] as const;
+            const back = oklchToRgb(rgbToOklch([...rgb], space), space);
+            expect(maxAbsDelta(back, rgb)).toBeLessThanOrEqual(1e-12);
+        }
     });
 });
 

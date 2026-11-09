@@ -1,6 +1,18 @@
 import type { HSL, RGB } from "@omi-io/color-core/types";
 import { clampUnit, wrapHueDegrees } from "@omi-io/color-core/normalization";
 
+/**
+ * HSL ↔ sRGB-encoded RGB: H in degrees `[0, 360)`, S and L as fractions `[0, 1]`.
+ */
+
+export interface HslToRgbOptions {
+    /**
+     * Clamp S and L to `[0, 1]` (default `true`). When false, values may
+     * produce out-of-gamut RGB; callers must clamp negative S to 0 first.
+     */
+    clampInputs?: boolean;
+}
+
 function hueFromRgb(max: number, delta: number, [r, g, b]: RGB): number {
     if (delta === 0) return 0;
     if (max === r) return 60 * (((g - b) / delta) % 6);
@@ -8,14 +20,10 @@ function hueFromRgb(max: number, delta: number, [r, g, b]: RGB): number {
     return 60 * ((r - g) / delta + 4);
 }
 
-function hueToRgb(p: number, q: number, t: number): number {
-    const hue = t < 0 ? t + 1 : t > 1 ? t - 1 : t;
-    if (hue < 1 / 6) return p + (q - p) * 6 * hue;
-    if (hue < 1 / 2) return q;
-    if (hue < 2 / 3) return p + (q - p) * (2 / 3 - hue) * 6;
-    return p;
-}
-
+/**
+ * sRGB-encoded RGB → HSL. Inputs are clamped to `[0, 1]`; achromatic input
+ * yields h = 0 and s = 0.
+ */
 export function rgbToHsl(rgb: RGB): HSL {
     const [r, g, b] = [clampUnit(rgb[0]), clampUnit(rgb[1]), clampUnit(rgb[2])];
     const max = Math.max(r, g, b);
@@ -27,16 +35,19 @@ export function rgbToHsl(rgb: RGB): HSL {
     return [h, s, l];
 }
 
-export function hslToRgb([h, s, l]: HSL): RGB {
-    const hue = wrapHueDegrees(h) / 360;
-    const sat = clampUnit(s);
-    const light = clampUnit(l);
-    if (sat === 0) return [light, light, light];
-    const q = light < 0.5 ? light * (1 + sat) : light + sat - light * sat;
-    const p = 2 * light - q;
-    return [
-        hueToRgb(p, q, hue + 1 / 3),
-        hueToRgb(p, q, hue),
-        hueToRgb(p, q, hue - 1 / 3),
-    ];
+/**
+ * HSL → sRGB-encoded RGB using CSS Color 4 §7.1. Non-finite hue is treated as 0.
+ */
+export function hslToRgb([h, s, l]: HSL, options?: HslToRgbOptions): RGB {
+    const wrapped = wrapHueDegrees(h);
+    const hue = Number.isNaN(wrapped) ? 0 : wrapped;
+    const clamp = options?.clampInputs ?? true;
+    const sat = clamp ? clampUnit(s) : s;
+    const light = clamp ? clampUnit(l) : l;
+    const a = sat * Math.min(light, 1 - light);
+    const channel = (n: number): number => {
+        const k = (n + hue / 30) % 12;
+        return light - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    };
+    return [channel(0), channel(8), channel(4)];
 }
