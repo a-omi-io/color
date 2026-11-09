@@ -1,3 +1,17 @@
+## 0.2.0 (2026-11-09)
+
+### 🩹 Fixes
+
+- ⚠️  **@:datasets:** one D65/D50 white from xy, sRGB matrix derived, true whitepoint sources ([fd6c158](https://github.com/a-omi-io/color/commit/fd6c158))
+
+### ⚠️  Breaking Changes
+
+- **@:datasets:** one D65/D50 white from xy, sRGB matrix derived, true whitepoint sources  ([fd6c158](https://github.com/a-omi-io/color/commit/fd6c158))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.1.0 (2026-05-10)
 
 ### 🚀 Features
