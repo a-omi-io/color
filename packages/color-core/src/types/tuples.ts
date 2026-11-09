@@ -30,8 +30,8 @@ export type MutVec4 = [number, number, number, number];
  * - Vectors are treated as **column vectors** for matrix multiplication.
  * - `multiplyMatrix3x3Vector3(M, v)` computes `M * v` where `v` is a column.
  *
- * This matches common colorimetric software (e.g. colour-science) and CIE
- * 015:2018 matrix usage (https://cie.co.at/publications/colorimetry-4th-edition)
+ * This is the convention used here for CIE 015:2018 relationships
+ * (https://cie.co.at/publications/colorimetry-4th-edition)
  * for pipelines such as `XYZ = M_rgb_to_xyz * RGB` and
  * `XYZ_t = M_inv * D * M * XYZ_s`.
  */

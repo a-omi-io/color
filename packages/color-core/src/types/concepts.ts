@@ -55,11 +55,6 @@ export interface RGBColorspace {
     matrixRGBToXYZ: Matrix3x3;
     matrixXYZToRGB: Matrix3x3;
     transfer: TransferFunctionPair;
-    /**
-     * `true` if the matrices were computed from primaries + whitepoint via NPM.
-     * `false` if they were taken verbatim from the standard's published values.
-     */
-    derived: boolean;
     aliases?: ReadonlyArray<string>;
     source?: string;
 }

@@ -1,18 +1,11 @@
 import type { DefaultsConfig } from "../types";
 
-/**
- * Library-wide default configuration.
- *
- * Resolved to match `colour-science` defaults where applicable:
- * - chromatic adaptation transform: CAT02
- * - colorspace spelling: American (`colorspace`)
- * - out-of-gamut handling: explicit policy (`clampPolicy: "none"` by default)
- */
+/** Library-wide defaults, using Bradford adaptation for CSS Color 4 compatibility. */
 export const DEFAULTS = {
     observer: "CIE 1931 2 Degree",
     illuminant: "D65",
     rgbColorspace: "sRGB",
-    chromaticAdaptationTransform: "CAT02",
+    chromaticAdaptationTransform: "Bradford",
     domainScale: 1,
     clampPolicy: "none",
 } as const satisfies DefaultsConfig;

@@ -5,8 +5,7 @@ import type { Matrix3x3, MutMatrix3x3, MutVec3, Vec3 } from "../types";
  *
  * Layout convention is row-major with column-vector multiplication, see
  * `types/tuples.ts` for the full contract. All operations are unrolled for
- * the 3x3 case, with no NDArray dependency. The legacy `@ts-nocheck`
- * `np.dot` / `np.invertMatrix` helpers are intentionally not used.
+ * the 3x3 case.
  */
 
 export const MATRIX_IDENTITY_3X3: Matrix3x3 = [

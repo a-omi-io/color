@@ -1,10 +1,4 @@
-/**
- * Stable string identifiers used as keys into datasets.
- *
- * The unions below are intentionally narrow: they list only identifiers that
- * currently have backing data in this workspace. Extend them when additional
- * colorspaces, transforms, or transfer functions are wired into the datasets.
- */
+/** Stable string identifiers used as keys into datasets. */
 
 export type ObserverId = "CIE 1931 2 Degree" | "CIE 1964 10 Degree";
 
@@ -29,6 +23,7 @@ export type ChromaticAdaptationTransformId =
     | "CMCCAT97"
     | "CMCCAT2000";
 
+/** PQ, HLG, ACEScct and ACEScc are reserved; absent from TRANSFER_FUNCTIONS. */
 export type TransferFunctionId =
     | "linear"
     | "gamma-2.2"

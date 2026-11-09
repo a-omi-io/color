@@ -18,18 +18,18 @@ export type RGB8 = Vec3;
  * so this package stays free of semantic color tagging.
  */
 
-/** CMYK tuple in either `[0, 1]` or `[0, 100]`, per the chosen representation. */
+/** CMYK tuple `[C, M, Y, K]`, all channels as fractions in `[0, 1]`. */
 export type CMYK = Vec4;
 
 /**
- * HSL tuple. `H` is an angle (degrees by default), `S` and `L` are normalized
- * `[0, 1]` or percent `[0, 100]` per representation.
+ * HSL tuple `[H, S, L]`: hue in degrees `[0, 360)`, S and L as fractions `[0, 1]`.
  *
- * Note: HSL lightness and HSV value are different quantities; they intentionally
- * have distinct types so they cannot be silently swapped.
+ * HSL and HSV remain structurally assignable despite different channel meanings.
  */
 export type HSL = Vec3;
+/** HSV tuple `[H, S, V]`: `H` in degrees `[0, 360)`, `S` and `V` as fractions `[0, 1]`. */
 export type HSV = Vec3;
+/** Alias of {@link HSV} under the HSB name. */
 export type HSB = Vec3;
 
 /** CIE chromaticity coordinates `(x, y)`. `z = 1 - x - y` is implicit. */

@@ -1,10 +1,7 @@
-import { EPSILON_MATRIX_SINGULAR_DET } from "../constants/epsilon";
+import { EPSILON_MATRIX_SINGULAR_RELATIVE } from "../constants/epsilon";
 import type { Matrix3x3, MutMatrix3x3 } from "../types";
 
-/**
- * Determinant via cofactor expansion along row 0. Closed-form to avoid any
- * dependency on the legacy NDArray helpers.
- */
+/** Determinant via cofactor expansion along row 0. */
 export function determinantMatrix3x3(m: Matrix3x3): number {
     const [r0, r1, r2] = m;
     return (
@@ -14,17 +11,29 @@ export function determinantMatrix3x3(m: Matrix3x3): number {
     );
 }
 
-/** Inverse via the closed-form adjugate / determinant formula. */
+function rowNorm(row: Matrix3x3[number]): number {
+    return Math.hypot(row[0], row[1], row[2]);
+}
+
+/**
+ * Inverse via the closed-form adjugate / determinant formula.
+ *
+ * Uses {@link EPSILON_MATRIX_SINGULAR_RELATIVE} to accept small, well-conditioned
+ * matrices. Throws RangeError for singular matrices or non-finite entries.
+ * Extreme scales can overflow or underflow intermediate float64 arithmetic.
+ */
 export function invertMatrix3x3(m: Matrix3x3): MutMatrix3x3 {
     const det = determinantMatrix3x3(m);
-    if (Math.abs(det) < EPSILON_MATRIX_SINGULAR_DET) {
+    const [r0, r1, r2] = m;
+    const bound = rowNorm(r0) * rowNorm(r1) * rowNorm(r2);
+    if (!(Math.abs(det) > EPSILON_MATRIX_SINGULAR_RELATIVE * bound)) {
         throw new RangeError(
-            `invertMatrix3x3: matrix is singular ` +
-                `(|det| = ${Math.abs(det)} < ${EPSILON_MATRIX_SINGULAR_DET})`
+            `invertMatrix3x3: matrix is singular or not finite ` +
+                `(|det| = ${Math.abs(det)}, Hadamard bound = ${bound}, ` +
+                `relative threshold = ${EPSILON_MATRIX_SINGULAR_RELATIVE})`
         );
     }
     const invDet = 1 / det;
-    const [r0, r1, r2] = m;
     return [
         [
             (r1[1] * r2[2] - r1[2] * r2[1]) * invDet,

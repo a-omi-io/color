@@ -14,7 +14,7 @@ Branded semantic tuples (`LinearRGB`, `XYZ`, `Lab`, …) live in
 `@omi-io/color-models` so this package stays small and easy to depend on from
 data-only code.
 
-> **Status: `0.1.0`.** The API is public, but pre-`1.0.0` semver still allows
+> **Status: `0.2.0`.** The API is public, but pre-`1.0.0` semver still allows
 > breaking changes in minor releases. After `1.0.0`, breaking changes will be
 > major-only and should go through deprecation where practical.
 
@@ -93,6 +93,7 @@ import {
     CHANNEL_LIMITS,
     CIE_LAB,
     EPSILON_MATRIX_SINGULAR_DET,
+    EPSILON_MATRIX_SINGULAR_RELATIVE,
     EPSILON_UNIT_INTERVAL,
     EPSILON_XYZ,
     SRGB_TRANSFER,
@@ -105,7 +106,8 @@ CHANNEL_LIMITS.RGB_8BIT; // { min: 0, max: 255 }
 CIE_LAB.EPSILON; // 216 / 24389  (a.k.a. 0.008856)
 SRGB_TRANSFER.GAMMA; // 2.4
 DEFAULTS.illuminant; // "D65"
-EPSILON_MATRIX_SINGULAR_DET; // singular-matrix guard for invertMatrix3x3
+EPSILON_MATRIX_SINGULAR_RELATIVE; // relative singularity guard for invertMatrix3x3
+EPSILON_MATRIX_SINGULAR_DET; // deprecated legacy absolute determinant threshold
 ```
 
 CIE constants are kept in **rational** form (`216 / 24389`, `(29/3)^3`, …).
@@ -119,8 +121,8 @@ CI.
 - Matrices index as `m[row][column]`.
 - `multiplyMatrix3x3Vector3(M, v)` computes `M * v` with `v` as a column.
 
-This aligns with [colour-science](https://github.com/colour-science/colour) and
-the matrix usage in [CIE 015:2018 *Colorimetry*](https://cie.co.at/publications/colorimetry-4th-edition).
+This is the matrix convention used here for the relationships in
+[CIE 015:2018 *Colorimetry*](https://cie.co.at/publications/colorimetry-4th-edition).
 
 ```ts
 import {
@@ -143,9 +145,22 @@ import {
 const xyz = multiplyMatrix3x3Vector3(rgbToXyz, [0.5, 0.4, 0.1]);
 ```
 
-`invertMatrix3x3` throws `RangeError` when
-`|det| < EPSILON_MATRIX_SINGULAR_DET` instead of returning `Infinity` / `NaN`,
-so a singular CAT or NPM matrix fails fast at the call site.
+`invertMatrix3x3` throws `RangeError` when the matrix is singular relative to
+its own scale — `|det| ≤ EPSILON_MATRIX_SINGULAR_RELATIVE · ‖r₀‖·‖r₁‖·‖r₂‖` (the
+Hadamard bound of the rows) — or has a non-finite entry, instead of returning
+`Infinity` / `NaN`, so a singular CAT or NPM matrix fails fast at the call
+site. The relative guard accepts well-conditioned small matrices such as
+`1e-5 · I`. The determinant, row-norm product and cofactors are computed
+directly in float64, so extreme scales can still overflow or underflow;
+for example, `1e150 · I` and `1e-150 · I` are rejected despite good conditioning.
+
+`EPSILON_MATRIX_SINGULAR_DET` remains `1e-12` with its historical absolute
+meaning for existing callers, and is deprecated. To make a caller's guard
+agree with `invertMatrix3x3`, replace `Math.abs(det) < EPSILON_MATRIX_SINGULAR_DET`
+with `!(Math.abs(det) > EPSILON_MATRIX_SINGULAR_RELATIVE * bound)`, where
+`bound` is the product of the three Euclidean row norms. Renaming the constant
+alone is insufficient: the bound supplies the matrix scale, and the negated
+comparison also rejects non-finite determinants and bounds.
 
 ### Normalization
 
@@ -170,19 +185,20 @@ wrapHueDegrees(450); // 90
 ```
 
 `normalizeHueDegrees` is the same operation as `wrapHueDegrees` (degrees
-`[0, 360)`). `denormalize8BitChannel` and `unitToRgb8` accept optional
+`[0, 360)`). Neither returns `360` or `-0`, and non-finite input yields
+`NaN`. `denormalize8BitChannel` and `unitToRgb8` accept optional
 `RoundingOptions` (`mode`, `decimals`) so callers can choose float channels for
 math vs display-ready integers without ad hoc `Math.round` at every call site.
 
 ## Conventions
 
-- **No silent failures.** Out-of-domain inputs are clamped via an explicit helper
-  or rejected with a thrown error. There is no global “lenient mode”.
+- **Explicit boundary policies.** Normalization helpers clamp their documented
+  channel domains. Raw arithmetic retains IEEE 754 behavior; for example,
+  `divVec3` can return `Infinity` or `NaN` on division by zero.
 - **Explicit `YScale`.** Whitepoints carry `YScale: 1 | 100` so `Y = 1`
   (NPM-style) and `Y = 100` (CIE-table-style) data are not mixed by accident.
-- **`derived` on RGB colorspaces.** Marks matrices recomputed from primaries +
-  whitepoint (NPM) vs values taken verbatim from a standard—important when
-  matching reference implementations bit-for-bit.
+- **Bradford adaptation by default.** `DEFAULTS.chromaticAdaptationTransform`
+  is `"Bradford"`, shared by direct adaptation and CSS conversion paths.
 
 ## Scripts
 

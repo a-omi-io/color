@@ -51,4 +51,46 @@ describe("matrix3 - inverse", () => {
         ];
         expect(() => invertMatrix3x3(singular)).toThrow(RangeError);
     });
+
+    // The old absolute threshold rejected 1e-5 * I despite its condition number of 1.
+    it("inverts small well-conditioned matrices", () => {
+        const small: Matrix3x3 = [
+            [1e-5, 0, 0],
+            [0, 1e-5, 0],
+            [0, 0, 1e-5],
+        ];
+        expectMatrixCloseTo(invertMatrix3x3(small), [
+            [1e5, 0, 0],
+            [0, 1e5, 0],
+            [0, 0, 1e5],
+        ]);
+        const scaled = SRGB_M.map(row =>
+            row.map(v => v * 1e-6)
+        ) as unknown as Matrix3x3;
+        expectMatrixCloseTo(
+            multiplyMatrix3x3(scaled, invertMatrix3x3(scaled)),
+            MATRIX_IDENTITY_3X3
+        );
+    });
+
+    it("rejects small and large singular matrices and non-finite entries", () => {
+        const tinySingular: Matrix3x3 = [
+            [1e-6, 2e-6, 3e-6],
+            [2e-6, 4e-6, 6e-6],
+            [1e-6, 1e-6, 1e-6],
+        ];
+        expect(() => invertMatrix3x3(tinySingular)).toThrow(RangeError);
+        const hugeSingular: Matrix3x3 = [
+            [1e6, 2e6, 3e6],
+            [2e6, 4e6, 6e6],
+            [1e6, 1e6, 1e6],
+        ];
+        expect(() => invertMatrix3x3(hugeSingular)).toThrow(RangeError);
+        const withNaN: Matrix3x3 = [
+            [1, 0, 0],
+            [0, Number.NaN, 0],
+            [0, 0, 1],
+        ];
+        expect(() => invertMatrix3x3(withNaN)).toThrow(RangeError);
+    });
 });

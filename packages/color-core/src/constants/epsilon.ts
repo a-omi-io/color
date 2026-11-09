@@ -9,10 +9,18 @@
 export const EPSILON_FLOAT = 1e-12;
 
 /**
- * Minimum absolute determinant before {@link invertMatrix3x3} treats a 3×3
- * matrix as singular.
+ * Legacy absolute determinant threshold.
+ *
+ * @deprecated Use {@link EPSILON_MATRIX_SINGULAR_RELATIVE} multiplied by the
+ * product of the row norms to match {@link invertMatrix3x3}.
  */
 export const EPSILON_MATRIX_SINGULAR_DET = EPSILON_FLOAT;
+
+/**
+ * Relative singularity threshold for {@link invertMatrix3x3}:
+ * `|det| <= EPSILON_MATRIX_SINGULAR_RELATIVE * ∏ ||row_i||` (Hadamard bound).
+ */
+export const EPSILON_MATRIX_SINGULAR_RELATIVE = EPSILON_FLOAT;
 
 /**
  * Fuzzy edge for values that should lie in the unit interval after
