@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-datasets",
   "scopeCommitName": "@:datasets",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Curated reference data: standard illuminants and tristimulus tables, RGB colorspace definitions, transfer-function pairs, and chromatic-adaptation transforms.",
   "keywords": [
     "color",
@@ -43,7 +43,7 @@
     "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@omi-io/color-core": "^0.1.0"
+    "@omi-io/color-core": "^0.2.0"
   },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",

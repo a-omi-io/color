@@ -6,21 +6,25 @@ import {
 import type {
     IlluminantName,
     ObserverId,
-    Vec3,
     Whitepoint,
 } from "@omi-io/color-core/types";
 import { CHROMATICITY_COORDINATES } from "./chromaticity-coordinates";
-import { TRISTIMULUS_VALUES } from "./tristimulus-values";
+import { chromaticityToXYZ } from "./chromaticity-to-xyz";
 
-const WHITEPOINT_SOURCE =
-    "CIE 15:2004 Colorimetry (3rd ed.), Tables T.3 and T.5";
+/**
+ * Named whites derive XYZ with `Y = 1` from CHROMATICITY_COORDINATES,
+ * following the CSS Color 4 convention rather than tabulated tristimulus values.
+ */
+const CSS_WHITE_SOURCE =
+    "XYZ = [x/y, 1, (1-x-y)/y] from the 4-decimal xy of CSS Color 4 / IEC 61966-2-1; tabulated CIE 015:2018 XYZ in TRISTIMULUS_VALUES for reference";
+const CIE_WHITE_SOURCE =
+    "XYZ = [x/y, 1, (1-x-y)/y] from the 5-decimal CIE 015 xy; tabulated CIE 015:2018 XYZ in TRISTIMULUS_VALUES for reference";
 
-function normaliseComponent(value: number, whiteY: number): number {
-    return Number((value / whiteY).toFixed(12));
-}
-
-function normaliseXYZToY1([x, y, z]: Vec3): Vec3 {
-    return [normaliseComponent(x, y), 1, normaliseComponent(z, y)];
+function whitepointSource(observer: ObserverId, name: IlluminantName): string {
+    const isCssWhite =
+        observer === STANDARD_OBSERVERS.CIE_1931_2 &&
+        (name === "D65" || name === "D50");
+    return isCssWhite ? CSS_WHITE_SOURCE : CIE_WHITE_SOURCE;
 }
 
 function buildObserverWhitepoints(
@@ -28,17 +32,16 @@ function buildObserverWhitepoints(
 ): Record<IlluminantName, Whitepoint> {
     const entries = ILLUMINANT_NAMES.map(
         (name): [IlluminantName, Whitepoint] => {
-            const xyz = TRISTIMULUS_VALUES[observer][name];
-            const xy = CHROMATICITY_COORDINATES[observer][name];
+            const chromaticity = CHROMATICITY_COORDINATES[observer][name];
             return [
                 name,
                 {
                     name,
                     observer,
-                    xy,
-                    XYZ: normaliseXYZToY1(xyz),
+                    xy: chromaticity,
+                    XYZ: chromaticityToXYZ(chromaticity),
                     YScale: 1,
-                    source: WHITEPOINT_SOURCE,
+                    source: whitepointSource(observer, name),
                 },
             ];
         }

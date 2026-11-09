@@ -3,6 +3,7 @@ import {
     STANDARD_OBSERVERS,
 } from "@omi-io/color-core/constants";
 import type { Vec3 } from "@omi-io/color-core/types";
+import { CHROMATICITY_COORDINATES } from "./chromaticity-coordinates";
 import { TRISTIMULUS_VALUES } from "./tristimulus-values";
 
 function xyzToXy([x, y, z]: Vec3): [number, number] {
@@ -31,5 +32,35 @@ describe("TRISTIMULUS_VALUES", () => {
         expect(y1[1]).toBe(1);
         expect(x1).toBeCloseTo(x100, 12);
         expect(yChromaticity1).toBeCloseTo(yChromaticity100, 12);
+    });
+
+    // Reference: CIE 015:2018, cross-checked against colour-science TVS_ILLUMINANTS.
+    it("is CIE 015:2018 throughout", () => {
+        const two = TRISTIMULUS_VALUES[STANDARD_OBSERVERS.CIE_1931_2];
+        const ten = TRISTIMULUS_VALUES[STANDARD_OBSERVERS.CIE_1964_10];
+        expect(two.D65).toEqual([95.04, 100, 108.88]);
+        expect(two.D50).toEqual([96.42, 100, 82.51]);
+        expect(ten.D65).toEqual([94.81, 100, 107.32]);
+        expect(ten.D50).toEqual([96.72, 100, 81.43]);
+    });
+
+    it("stays within 3e-3 (relative) of the xy-derived whites the library uses (see whitepoints.spec for the tight bound)", () => {
+        Object.values(STANDARD_OBSERVERS).forEach(observer => {
+            ILLUMINANT_NAMES.forEach(name => {
+                const t = TRISTIMULUS_VALUES[observer][name];
+                const [x, y] = CHROMATICITY_COORDINATES[observer][name];
+                const fromXy: Vec3 = [
+                    (x / y) * 100,
+                    100,
+                    ((1 - x - y) / y) * 100,
+                ];
+                [0, 2].forEach(i => {
+                    const tab = t[i] ?? Number.NaN;
+                    const ref = fromXy[i] ?? Number.NaN;
+                    const rel = Math.abs(tab - ref) / ref;
+                    expect(rel).toBeLessThan(3e-3);
+                });
+            });
+        });
     });
 });

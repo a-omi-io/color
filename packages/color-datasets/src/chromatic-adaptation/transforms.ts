@@ -69,17 +69,14 @@ export const CHROMATIC_ADAPTATION_TRANSFORMS: Record<
     ),
     CMCCAT97: createTransform(
         "CMCCAT97",
-        // Linear core of CMCCAT97 (Luo & Hunt, 1998) is identical to the
-        // Bradford matrix, see colour-science `colour.adaptation.datasets.
-        // CAT_CMCCAT97`. The legacy `packages/convert/src/models/types.ts`
-        // shipped a transposed-with-sign-flip variant that did not match any
-        // published reference; keep the canonical orientation here.
+        // Fully adapted, linearized CIECAM97s/Bradford compatibility alias.
+        // Omits the blue-channel nonlinearity of the full CMCCAT97 model.
         [
             [0.8951, 0.2664, -0.1614],
             [-0.7502, 1.7135, 0.0367],
             [0.0389, -0.0685, 1.0296],
         ],
-        "CMCCAT97 (linear core); Luo and Hunt, 1998"
+        "ICC.1:2001-04 Annex E.1.2; ICC.1:2004-10 Annex E.3, Eq. E.1 (fully adapted linearized Bradford/CIECAM97s); https://www.color.org/ICC1v42_2006-05.pdf"
     ),
     CMCCAT2000: createTransform(
         "CMCCAT2000",

@@ -6,7 +6,7 @@ import type {
 const GAMMA_SOURCE =
     "SMPTE RP 431-2 (DCI-P3 gamma) and Adobe RGB (1998) specification";
 
-/** Adobe RGB (1998) uses the irrational gamma 563/256, commonly rounded to 2.2. */
+/** Adobe RGB (1998) uses gamma 563/256, commonly rounded to 2.2. */
 export const ADOBE_RGB_GAMMA = 563 / 256;
 
 /** DCI-P3 (SMPTE RP 431-2) display reference uses pure power gamma 2.6. */

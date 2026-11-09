@@ -38,4 +38,35 @@ describe("SRGB_TRANSFER_FUNCTION", () => {
             SRGB_TRANSFER_FUNCTION.decode(SRGB_TRANSFER_FUNCTION.encode(1))
         ).toBe(1);
     });
+
+    it("mirrors negative values like CSS Color 4 (extended transfer)", () => {
+        const cssGam = (v: number): number => {
+            const sign = v < 0 ? -1 : 1;
+            const abs = Math.abs(v);
+            return abs > 0.0031308
+                ? sign * (1.055 * Math.pow(abs, 1 / 2.4) - 0.055)
+                : 12.92 * v;
+        };
+        const cssLin = (v: number): number => {
+            const sign = v < 0 ? -1 : 1;
+            const abs = Math.abs(v);
+            return abs <= 0.04045
+                ? v / 12.92
+                : sign * Math.pow((abs + 0.055) / 1.055, 2.4);
+        };
+        for (const v of [
+            -1.5, -1, -0.5, -0.1, -0.04045, -0.003, -1e-9, 0, 0.5, 1.2, 2,
+        ]) {
+            expect(SRGB_TRANSFER_FUNCTION.encode(v)).toBe(cssGam(v));
+            expect(SRGB_TRANSFER_FUNCTION.decode(v)).toBe(cssLin(v));
+        }
+        expect(SRGB_TRANSFER_FUNCTION.encode(-0.1)).toBeCloseTo(
+            -0.3491902126282938,
+            15
+        );
+        expect(SRGB_TRANSFER_FUNCTION.decode(-0.3)).toBeCloseTo(
+            -0.07323895587840543,
+            15
+        );
+    });
 });

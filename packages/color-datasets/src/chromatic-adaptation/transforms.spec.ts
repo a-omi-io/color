@@ -34,9 +34,18 @@ describe("CHROMATIC_ADAPTATION_TRANSFORMS", () => {
         });
     });
 
-    it("CMCCAT97 linear core matches Bradford (regression for legacy bug)", () => {
+    it("CMCCAT97 identifier exposes the ICC fully adapted linearized CIECAM97s/Bradford matrix", () => {
+        // ICC.1:2004-10 Annex E.3, Eq. E.1.
+        // https://www.color.org/ICC1v42_2006-05.pdf (printed page 87)
         const cmccat97 = CHROMATIC_ADAPTATION_TRANSFORMS.CMCCAT97;
         const bradford = CHROMATIC_ADAPTATION_TRANSFORMS.Bradford;
+        const published = [
+            [0.8951, 0.2664, -0.1614],
+            [-0.7502, 1.7135, 0.0367],
+            [0.0389, -0.0685, 1.0296],
+        ];
+        expect(cmccat97.kind).toBe("linear-von-kries");
+        expect(cmccat97.matrixXYZToCone).toEqual(published);
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 expect(cmccat97.matrixXYZToCone[i]?.[j]).toBeCloseTo(
