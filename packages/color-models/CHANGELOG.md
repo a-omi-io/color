@@ -1,3 +1,17 @@
+## 0.3.0 (2026-11-09)
+
+### 🩹 Fixes
+
+- ⚠️  **@:models:** move to @omi-io/color-core 0.2.0; HSL/CMYK documented as [0,1] ([ebc6f9a](https://github.com/a-omi-io/color/commit/ebc6f9a))
+
+### ⚠️  Breaking Changes
+
+- **@:models:** move to @omi-io/color-core 0.2.0; HSL/CMYK documented as [0,1]  ([ebc6f9a](https://github.com/a-omi-io/color/commit/ebc6f9a))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.2.1 (2026-07-06)
 
 ### 📚 Documentation
