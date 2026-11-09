@@ -13,11 +13,17 @@ declare const oklchBrand: unique symbol;
 export type Oklch = Vec3 & { readonly [oklchBrand]: true };
 
 declare const ictcpBrand: unique symbol;
-/** ICtCp / LMS-based constant-luminance + blue-yellow, red-yellow chroma. */
+/**
+ * ICtCp / LMS-based constant-luminance + blue-yellow, red-yellow chroma.
+ * Type only: `@omi-io/color-convert` has no conversion to or from it.
+ */
 export type ICtCp = Vec3 & { readonly [ictcpBrand]: true };
 
 declare const jzazbzBrand: unique symbol;
-/** Jzazbz HDR-friendly space (Jz, az, bz). */
+/**
+ * Jzazbz HDR-friendly space (Jz, az, bz).
+ * Type only: `@omi-io/color-convert` has no conversion to or from it.
+ */
 export type JzAzBz = Vec3 & { readonly [jzazbzBrand]: true };
 
 export function unsafeAsLCh(v: Vec3): LCh {

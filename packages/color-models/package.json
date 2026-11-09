@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-models",
   "scopeCommitName": "@:models",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Nominal TypeScript brands for semantic color tuples (e.g. linear vs encoded RGB, XYZ, Lab) plus aliases for extended spaces like LCh and Oklab.",
   "keywords": [
     "color",
@@ -38,7 +38,7 @@
     "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@omi-io/color-core": "^0.1.0"
+    "@omi-io/color-core": "^0.2.0"
   },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",

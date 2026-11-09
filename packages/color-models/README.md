@@ -3,7 +3,8 @@
 Type-level **brands** for CIE and RGB semantic tuples (`LinearRGB`, `EncodedRGB`,
 `XYZ`, `XYZForYScale<1 | 100>`, `Lab`, …) plus aliases for additional spaces
 (`LCh`, `Oklab`, `Oklch`, `ICtCp`, `JzAzBz`) and 4-channel alpha variants
-(`RGBA`, `HSLA`, `Laba`, `LCha`, `Oklaba`, `Oklcha`).
+(`RGBA`, `HSLA`, `Laba`, `LCha`, `Oklaba`, `Oklcha`). `ICtCp` and `JzAzBz` are
+types only: `@omi-io/color-convert` has no conversions for them.
 
 This package depends only on `@omi-io/color-core` (`Vec3`, `IlluminantName`).
 Runtime values are still ordinary length-3 arrays; brands exist so TypeScript
