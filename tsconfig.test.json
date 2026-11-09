@@ -1,0 +1,55 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "rootDir": ".",
+        "declaration": false,
+        "emitDeclarationOnly": false,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "noUncheckedIndexedAccess": true,
+        "types": [
+            "node",
+            "jest"
+        ],
+        "paths": {
+            "@omi-io/color-core": [
+                "packages/color-core/src/index.ts"
+            ],
+            "@omi-io/color-core/*": [
+                "packages/color-core/src/*"
+            ],
+            "@omi-io/color-models": [
+                "packages/color-models/src/index.ts"
+            ],
+            "@omi-io/color-models/*": [
+                "packages/color-models/src/*"
+            ],
+            "@omi-io/color-datasets": [
+                "packages/color-datasets/src/index.ts"
+            ],
+            "@omi-io/color-datasets/*": [
+                "packages/color-datasets/src/*"
+            ],
+            "@omi-io/color-convert": [
+                "packages/color-convert/src/index.ts"
+            ],
+            "@omi-io/color-convert/*": [
+                "packages/color-convert/src/*"
+            ],
+            "@omi-io/color-css": [
+                "packages/color-css/src/index.ts"
+            ],
+            "@omi-io/color-css/*": [
+                "packages/color-css/src/*"
+            ],
+            "@omi-io/color-gamut": [
+                "packages/color-gamut/src/index.ts"
+            ],
+            "@omi-io/color-gamut/*": [
+                "packages/color-gamut/src/*"
+            ]
+        }
+    },
+    "include": ["packages/*/src/**/*"]
+}
