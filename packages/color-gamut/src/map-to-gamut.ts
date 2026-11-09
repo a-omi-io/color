@@ -1,15 +1,9 @@
 /**
- * Gamut mapping into an RGB display gamut.
- *
- * `clipToGamut` is the naive per-channel clamp (fast, can shift hue and
- * lightness far). `mapToGamut` is the strategy seam; the default `"css"`
- * implements CSS Color 4 `css-gamut-map` — binary search on Oklch chroma
- * with lightness and hue held, accepting a local clip once it is within
- * the `deltaEOK` JND of `0.02` — verifiable against browsers and
- * colorjs.io (the spec authors' reference). Per spec the CLIPPED color of
- * the converged candidate is returned, so the mapped result may move by
- * up to the JND in lightness/hue too, not only in chroma. `"cusp"`
- * (Ottosson's cusp projection) is reserved for a future track and throws.
+ * The default CSS Local MINDE strategy searches Oklch chroma at fixed L/h
+ * and returns a clipped result that may change both. Negative chroma counts as 0.
+ * `"clip"` clamps RGB channels; `"cusp"` is reserved and throws.
+ * Source: CSS Color 4, 3 November 2026, §14.2.2:
+ * https://www.w3.org/TR/2026/CRD-css-color-4-20261103/#binsearch
  */
 
 import { clampUnit, DEFAULTS } from "@omi-io/color-core";
@@ -39,11 +33,13 @@ export function clipToGamut(
     return [clampUnit(rgb[0]), clampUnit(rgb[1]), clampUnit(rgb[2])];
 }
 
-function cssGamutMap(oklch: Oklch, space: RGBColorspaceId): Oklch {
+function cssGamutMap(input: Oklch, space: RGBColorspaceId): Oklch {
+    const oklch =
+        input[1] < 0 ? unsafeAsOklch([input[0], 0, input[2]] as const) : input;
     const [lightness, chroma, hue] = oklch;
     if (lightness >= 1) return unsafeAsOklch([1, 0, 0] as const);
     if (lightness <= 0) return unsafeAsOklch([0, 0, 0] as const);
-    if (isOklchInGamut(oklch, space)) return oklch;
+    if (isOklchInGamut(oklch, space, 0)) return oklch;
 
     let min = 0;
     let max = chroma;
@@ -58,7 +54,7 @@ function cssGamutMap(oklch: Oklch, space: RGBColorspaceId): Oklch {
     while (max - min > CONVERGENCE_EPSILON) {
         const candidateChroma = (min + max) / 2;
         current = unsafeAsOklch([lightness, candidateChroma, hue] as const);
-        if (minInGamut && isOklchInGamut(current, space)) {
+        if (minInGamut && isOklchInGamut(current, space, 0)) {
             min = candidateChroma;
             continue;
         }
@@ -77,11 +73,10 @@ function cssGamutMap(oklch: Oklch, space: RGBColorspaceId): Oklch {
             max = candidateChroma;
         }
     }
-    // Per CSS Color 4 the final result is the CLIP of the converged
-    // candidate (`clip(current)`), recomputed here so the in-gamut branch's
-    // `continue` (which leaves `clipped` from an earlier, higher-chroma
-    // candidate) cannot return a stale value.
-    return rgbToOklch(clipToGamut(current, space), space);
+    // Step 19 returns the last computed clip. An in-gamut iteration can
+    // update `current` without updating `clipped`; recomputing it here changes
+    // the algorithm's specified result.
+    return rgbToOklch(clipped, space);
 }
 
 export function mapToGamut(

@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-gamut",
   "scopeCommitName": "@:gamut",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Gamut queries and mapping for RGB display gamuts: in-gamut checks, CSS Color 4 gamut mapping, naive clipping, max chroma per (L, h), and the deltaEOK metric.",
   "keywords": [
     "color",
@@ -39,9 +39,10 @@
     "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@omi-io/color-convert": "^0.3.0",
-    "@omi-io/color-core": "^0.1.0",
-    "@omi-io/color-models": "^0.2.0"
+    "@omi-io/color-convert": "^0.4.0",
+    "@omi-io/color-core": "^0.2.0",
+    "@omi-io/color-datasets": "^0.2.0",
+    "@omi-io/color-models": "^0.3.0"
   },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",

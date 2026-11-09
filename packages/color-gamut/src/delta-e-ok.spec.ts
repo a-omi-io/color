@@ -21,9 +21,9 @@ describe("deltaEOK", () => {
         expect(deltaEOK(a, b)).toBeCloseTo(Math.sqrt(0.5), 12);
     });
 
-    it("matches the colorjs.io reference for a pure chroma step", () => {
-        // colorjs.io (CSS Color 4 reference implementation):
-        // deltaEOK(oklch(0.35 0.35 150), oklch(0.35 0.25 150)) = 0.1
+    it("equals the chroma difference at constant lightness and hue", () => {
+        // The polar-to-Cartesian transform preserves radial distance:
+        // sqrt((ΔC cos h)^2 + (ΔC sin h)^2) = |ΔC|.
         const a = oklchToOklab(unsafeAsOklch([0.35, 0.35, 150] as const));
         const b = oklchToOklab(unsafeAsOklch([0.35, 0.25, 150] as const));
         expect(deltaEOK(a, b)).toBeCloseTo(0.1, 12);

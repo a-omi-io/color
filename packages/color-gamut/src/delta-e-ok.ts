@@ -2,9 +2,8 @@
  * deltaEOK — Euclidean distance in Oklab, the color-difference metric the
  * CSS Color 4 `css-gamut-map` algorithm is specified against (JND `0.02`).
  *
- * This is deliberately NOT `deltaE2000` from `@omi-io/color-convert`:
- * gamut mapping per CSS Color 4 requires the plain Oklab Euclid, and using
- * a different metric would diverge from the browser ground truth.
+ * CSS Color 4 §14.2.2 uses this metric to compare each chroma-search
+ * candidate with its clipped result; §20.3 defines the Euclidean formula.
  */
 
 import type { Oklab } from "@omi-io/color-models";
