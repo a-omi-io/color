@@ -1,19 +1,56 @@
-/**
- * Rounding / byte-clamping / suffix helpers shared by the display- and
- * model-format serializers. Internal to the serializer.
- */
+/** Internal rounding and token helpers for display and model serializers. */
 
-import { clampByteChannel, clampUnit, unitToRgb8 } from "@omi-io/color-core";
+import {
+    clampByteChannel,
+    clampUnit,
+    unitToRgb8,
+    wrapHueDegrees,
+} from "@omi-io/color-core";
 import type { RGB, RGB8 } from "@omi-io/color-core/types";
 
 export const DEFAULT_DECIMALS = 3;
-/** Oklab/Oklch channels live in `[0, 0.4]` — one extra digit of precision. */
+/** Small Oklab a/b and Oklch chroma values need extra decimal precision. */
 export const DEFAULT_OK_DECIMALS = 4;
+const ALPHA_DECIMALS = 3;
 
 export function round(value: number, decimals: number): number {
-    if (!Number.isFinite(value)) return 0;
     const factor = 10 ** decimals;
-    return Math.round(value * factor) / factor;
+    const scaled = value * factor;
+    // At this decimal scale binary64 cannot retain any finer precision.
+    if (!Number.isFinite(scaled) && Number.isFinite(factor)) return value;
+    return Math.round(scaled) / factor;
+}
+
+function assertNotInfinite(value: number): void {
+    if (value === Infinity || value === -Infinity) {
+        throw new RangeError(`color-css: cannot serialize ${value}`);
+    }
+}
+
+/** CSS Color 4 §4.4: NaN prints `none`; Infinity is rejected. */
+export function numberToken(
+    value: number,
+    decimals: number,
+    suffix = ""
+): string {
+    if (Number.isNaN(value)) return "none";
+    assertNotInfinite(value);
+    return `${round(value, decimals)}${suffix}`;
+}
+
+/**
+ * Wrap hue after rounding to avoid emitting 360; NaN prints `none`.
+ */
+export function hueToken(hue: number, decimals: number): string {
+    if (Number.isNaN(hue)) return "none";
+    assertNotInfinite(hue);
+    const rounded = round(wrapHueDegrees(hue), decimals);
+    return `${rounded >= 360 ? 0 : rounded}`;
+}
+
+/** A missing (`NaN`) component as `0` for conversion or legacy syntax. */
+export function missingAsZero(value: number): number {
+    return Number.isNaN(value) ? 0 : value;
 }
 
 export function pad2(byte: number): string {
@@ -28,11 +65,14 @@ export function toBytes(rgb: RGB): RGB8 {
     ]);
 }
 
-/** ` / A` suffix when alpha is present and not opaque; alpha ∈ `[0,1]`. */
+/**
+ * Clamp alpha and round to 3 decimals, omitting opaque values; NaN prints ` / none`.
+ */
 export function alphaSuffix(alpha: number | undefined): string {
     if (alpha === undefined) return "";
-    const value = clampUnit(alpha);
-    return value >= 1 ? "" : ` / ${round(value, 3)}`;
+    if (Number.isNaN(alpha)) return " / none";
+    const value = round(clampUnit(alpha), ALPHA_DECIMALS);
+    return value >= 1 ? "" : ` / ${value}`;
 }
 
 export function lightnessToken(
@@ -41,6 +81,7 @@ export function lightnessToken(
     decimals: number,
     percent: boolean | undefined
 ): string {
-    if (percent) return `${round(lightness * percentFactor, decimals)}%`;
-    return `${round(lightness, decimals)}`;
+    return percent
+        ? numberToken(lightness * percentFactor, decimals, "%")
+        : numberToken(lightness, decimals);
 }

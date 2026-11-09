@@ -1,8 +1,6 @@
 /**
- * Low-level token parsing: single components (`<number>`/`<percentage>`,
- * `<hue>`, alpha), the split of a function body into component + alpha
- * tokens, and the per-component scaling that turns tokens into numbers.
- * `none` → `0` for any component. Internal to the parser.
+ * Parse component/alpha tokens and function arguments into scaled numbers.
+ * `none` → `0`; numeric overflow → `null`. Internal to the parser.
  */
 
 import { clampUnit } from "@omi-io/color-core";
@@ -21,7 +19,9 @@ export function parseScaledComponent(
     const isPercent = token.endsWith("%");
     const numeric = isPercent ? token.slice(0, -1) : token;
     if (!NUMBER_PATTERN.test(numeric)) return null;
-    return parseFloat(numeric) * (isPercent ? scale.percent : scale.number);
+    const value =
+        parseFloat(numeric) * (isPercent ? scale.percent : scale.number);
+    return Number.isFinite(value) ? value : null;
 }
 
 export function parseHueComponent(token: string): number | null {
@@ -32,11 +32,11 @@ export function parseHueComponent(token: string): number | null {
     if (!NUMBER_PATTERN.test(numeric) || !HUE_UNIT_PATTERN.test(unit)) {
         return null;
     }
-    const value = parseFloat(numeric);
-    if (unit === "grad") return value * 0.9;
-    if (unit === "rad") return value * (180 / Math.PI);
-    if (unit === "turn") return value * 360;
-    return value;
+    let degrees = parseFloat(numeric);
+    if (unit === "grad") degrees *= 0.9;
+    if (unit === "rad") degrees *= 180 / Math.PI;
+    if (unit === "turn") degrees *= 360;
+    return Number.isFinite(degrees) ? degrees : null;
 }
 
 export function parseAlphaComponent(token: string | undefined): number | null {

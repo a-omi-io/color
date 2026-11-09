@@ -1,18 +1,11 @@
-/**
- * Function forms that resolve directly to sRGB: `rgb[a]()`, `hsl[a]()`,
- * `hsv[a]()`, `cmyk()` / `device-cmyk()` and `color(srgb | display-p3 …)`.
- * Returns `null` for any name it does not handle (the dispatcher then tries
- * the model forms). Internal to the parser.
- */
-
 import { hslToRgb, hsvToRgb } from "@omi-io/color-convert";
-import type { HSL, HSV } from "@omi-io/color-core/types";
+import type { HSV } from "@omi-io/color-core/types";
 import {
     parseCmykFunction,
     parseColorFunction,
     parseTripletFunction,
 } from "./channels";
-import { PERCENTAGE_UNIT, RGB_CHANNEL } from "./scales";
+import { clampNegativeToZero, PERCENTAGE_UNIT, RGB_CHANNEL } from "./scales";
 import type { ParsedColor } from "./types";
 
 export function parseRgbLikeFunction(
@@ -34,7 +27,11 @@ export function parseRgbLikeFunction(
             const parsed = parseTripletFunction(
                 body,
                 ["hue", PERCENTAGE_UNIT, PERCENTAGE_UNIT],
-                hsl => hslToRgb(hsl as HSL)
+                // CSS Color 4 §7 clamps only negative S; retain extended S/L.
+                ([h, s, l]) =>
+                    hslToRgb([h, clampNegativeToZero(s), l], {
+                        clampInputs: false,
+                    })
             );
             return parsed ? { ...parsed, source: "hsl" } : null;
         }

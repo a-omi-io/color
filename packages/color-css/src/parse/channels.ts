@@ -54,7 +54,8 @@ export function parseColorFunction(body: string): ParsedChannels | null {
     if (!args) return null;
     const [spaceToken, ...channelTokens] = args.components;
     const space =
-        spaceToken === undefined
+        spaceToken === undefined ||
+        !Object.prototype.hasOwnProperty.call(COLOR_FUNCTION_SPACES, spaceToken)
             ? undefined
             : COLOR_FUNCTION_SPACES[spaceToken];
     if (space === undefined) return null;

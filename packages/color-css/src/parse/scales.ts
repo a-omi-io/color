@@ -1,10 +1,7 @@
-/**
- * Component `%`/number multipliers per CSS Color Module Level 4 — the single
- * point of truth for the scale of every component. See the table in the
- * package README / the `parseColor` doc comment for the full mapping.
- */
+/** Component scales and parse-time clamps; see the package README for syntax. */
 
 import { CIELAB_D50_ADAPTATION } from "@omi-io/color-convert";
+import { clampPercentChannel, clampUnit } from "@omi-io/color-core";
 import type {
     RGBColorspaceConversionOptions,
     RGBColorspaceId,
@@ -12,7 +9,7 @@ import type {
 import type { ComponentScale } from "./types";
 
 export const RGB_CHANNEL: ComponentScale = { number: 1 / 255, percent: 0.01 };
-/** `hsl()`/`hsv()` s/l/v: CSS treats a bare number as a percentage. */
+/** HSL/HSV S/L/V: bare numbers use percentage units. */
 export const PERCENTAGE_UNIT: ComponentScale = { number: 0.01, percent: 0.01 };
 /** `cmyk()` / `color()` channels: bare numbers are already `[0,1]` units. */
 export const UNIT_OR_PERCENT: ComponentScale = { number: 1, percent: 0.01 };
@@ -30,12 +27,22 @@ export const COLOR_FUNCTION_SPACES: Readonly<Record<string, RGBColorspaceId>> =
         "display-p3": "Display P3",
     };
 
+/** CSS Color 4 §9.3: Lab/LCh lightness is limited to `[0, 100]`. */
+export function clampLabLightness(lightness: number): number {
+    return clampPercentChannel(lightness);
+}
+
+/** CSS Color 4 §9.4: Oklab/Oklch lightness is limited to `[0, 1]`. */
+export function clampOkLightness(lightness: number): number {
+    return clampUnit(lightness);
+}
+
+export function clampNegativeToZero(value: number): number {
+    return value < 0 ? 0 : value;
+}
+
 /**
- * CSS Color 4 uses Bradford for the D50 ↔ D65 leg of `lab()`/`lch()`. Taken
- * from `@omi-io/color-convert` rather than spelled out here: the pipeline
- * defaults that leg to the same transform, and the two must not drift — when
- * they did, a `lab()` string parsed here and re-derived through the pipeline
- * came back as a different color.
+ * Shared Bradford D50 ↔ D65 policy keeps CSS parsing and the Lab pipeline consistent.
  */
 export const LAB_PIPELINE_OPTIONS: RGBColorspaceConversionOptions = {
     adaptation: CIELAB_D50_ADAPTATION,

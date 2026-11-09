@@ -1,18 +1,14 @@
 import {
     cmykToRgb,
     convertByPipeline,
-    convertRGBColorspace,
     hslToRgb,
     hsvToRgb,
     oklabToRgb,
     oklchToRgb,
 } from "@omi-io/color-convert";
 import type { RGB, Vec3 } from "@omi-io/color-core/types";
-import {
-    unsafeAsEncodedRGB,
-    unsafeAsOklab,
-    unsafeAsOklch,
-} from "@omi-io/color-models";
+import { unsafeAsOklab, unsafeAsOklch } from "@omi-io/color-models";
+import standards from "../../../color-convert/src/conversions/__fixtures__/css-color-4.json";
 import { CSS_NAMED_COLORS } from "../named-colors";
 import { parseColor } from "./index";
 
@@ -26,6 +22,21 @@ function expectRgbClose(
     expect(actual[0]).toBeCloseTo(expected[0], digits);
     expect(actual[1]).toBeCloseTo(expected[1], digits);
     expect(actual[2]).toBeCloseTo(expected[2], digits);
+}
+
+function referenceVector(values: ReadonlyArray<number>): Vec3 {
+    expect(values).toHaveLength(3);
+    return [
+        values[0] ?? Number.NaN,
+        values[1] ?? Number.NaN,
+        values[2] ?? Number.NaN,
+    ];
+}
+
+function referenceParsedRgb(css: string): Vec3 {
+    const row = standards.parse.find(sample => sample.css === css);
+    expect(row).toBeDefined();
+    return referenceVector(row?.rgb ?? []);
 }
 
 describe("parseColor: hex", () => {
@@ -115,6 +126,11 @@ describe("parseColor: rgb()", () => {
         expect(parseColor("rgb(255 0 0 / -1)")?.alpha).toBe(0);
     });
 
+    it("accepts line breaks and tabs between components", () => {
+        const parsed = parseColor("rgb(\n255\n0\t0 /\n50%\n)");
+        expect(parsed).toEqual({ rgb: [1, 0, 0], alpha: 0.5, source: "rgb" });
+    });
+
     it("rejects wrong arity and garbage components", () => {
         expect(parseColor("rgb(1 2)")).toBeNull();
         expect(parseColor("rgb(1 2 3 4 5)")).toBeNull();
@@ -188,11 +204,8 @@ describe("parseColor: lab() / lch()", () => {
         expect(parsed?.alpha).toBeCloseTo(0.4, 10);
     });
 
-    // Regression: the parser pins Bradford (CSS Color 4) while the pipeline
-    // used to fall back to `DEFAULTS.chromaticAdaptationTransform` (CAT02), so
-    // a `lab()` string parsed here and re-derived through the DEFAULT pipeline
-    // path came back as a different color (~1.3 units of a/b). Both sides now
-    // resolve to `CIELAB_D50_ADAPTATION`; assert it with NO options passed.
+    // Parsing and the default Lab D50 pipeline must both use Bradford;
+    // explicit options here would hide a mismatch between their defaults.
     it("round-trips through the pipeline's default Lab D50 path", () => {
         const coords = [51.363, 120, -120] as const;
         const parsed = parseColor(
@@ -254,9 +267,9 @@ describe("parseColor: oklab() / oklch()", () => {
         expect(parsed?.source).toBe("oklch");
         expectRgbClose(
             parsed?.rgb,
-            oklchToRgb(unsafeAsOklch([0.7, 0.1, 180] as const))
+            referenceParsedRgb("oklch(0.7 0.1 180)"),
+            12
         );
-        expectRgbClose(parsed?.rgb, [0.29287, 0.70096, 0.63001], 4);
     });
 
     it("parses slash alpha: oklch(0.7 0.1 180 / 50%)", () => {
@@ -275,18 +288,23 @@ describe("parseColor: oklab() / oklch()", () => {
         );
     });
 
-    it("treats none as 0 (powerless hue)", () => {
+    it("treats a missing hue as 0 before conversion", () => {
         expectRgbClose(
             parseColor("oklch(0.5 0.1 none)")?.rgb,
             oklchToRgb(unsafeAsOklch([0.5, 0.1, 0] as const))
         );
     });
 
-    it("round-trips sRGB red (engine vector)", () => {
+    it("round-trips sRGB red (CSS Color 4 vector)", () => {
+        const red = standards.srgb.find(
+            row => row.rgb8[0] === 255 && row.rgb8[1] === 0 && row.rgb8[2] === 0
+        );
+        expect(red).toBeDefined();
+        const [lightness, chroma, hue] = referenceVector(red?.oklch ?? []);
         expectRgbClose(
-            parseColor("oklch(0.62799 0.25764 29.2272)")?.rgb,
+            parseColor(`oklch(${lightness} ${chroma} ${hue})`)?.rgb,
             [1, 0, 0],
-            3
+            12
         );
     });
 
@@ -317,18 +335,13 @@ describe("parseColor: color()", () => {
     });
 
     it("converts color(display-p3 …) without clamping", () => {
-        const expected = convertRGBColorspace(
-            unsafeAsEncodedRGB([1, 0, 0] as const),
-            "Display P3",
-            "sRGB"
-        );
         const parsed = parseColor("color(display-p3 1 0 0)");
-        expectRgbClose(parsed?.rgb, [expected[0], expected[1], expected[2]]);
-        // P3 red is outside sRGB: r > 1, g/b < 0 (engine's linear-segment
-        // encoding for negative light; magnitudes are engine-specific).
-        expect(parsed?.rgb[0]).toBeCloseTo(1.09299, 4);
-        expect(parsed?.rgb[1]).toBeLessThan(0);
-        expect(parsed?.rgb[2]).toBeLessThan(0);
+        // P3 red uses the extended sRGB transfer for its negative channels.
+        expectRgbClose(
+            parsed?.rgb,
+            referenceParsedRgb("color(display-p3 1 0 0)"),
+            12
+        );
     });
 
     it("parses slash alpha", () => {
@@ -339,16 +352,104 @@ describe("parseColor: color()", () => {
         expect(parseColor("color(rec2020 1 0 0)")).toBeNull();
         expect(parseColor("color(srgb 1 0)")).toBeNull();
     });
+
+    it.each(["constructor", "__proto__"])(
+        "rejects inherited object keys as a colorspace: %s",
+        space => {
+            expect(parseColor(`color(${space} 1 0 0)`)).toBeNull();
+        }
+    );
+});
+
+describe("parseColor: CSS Color 4 parse-time clamps", () => {
+    it("clamps a negative chroma to 0: a grey, not the opposite hue", () => {
+        expectRgbClose(
+            parseColor("oklch(0.7 -0.1 30)")?.rgb,
+            referenceParsedRgb("oklch(0.7 0 0)"),
+            12
+        );
+        expectRgbClose(
+            parseColor("lch(50 -10 120)")?.rgb,
+            referenceParsedRgb("lab(50 0 0)"),
+            12
+        );
+    });
+
+    it("clamps L of lab()/lch() to [0, 100] and of oklab()/oklch() to [0, 1]", () => {
+        expectRgbClose(parseColor("lab(120 0 0)")?.rgb, [1, 1, 1], 12);
+        expectRgbClose(parseColor("lch(120% 0 0)")?.rgb, [1, 1, 1], 12);
+        expectRgbClose(parseColor("lab(-10 0 0)")?.rgb, [0, 0, 0], 12);
+        expectRgbClose(parseColor("oklab(1.2 0 0)")?.rgb, [1, 1, 1], 12);
+        expectRgbClose(parseColor("oklch(-50% 0 0)")?.rgb, [0, 0, 0], 12);
+    });
+
+    it("leaves a/b unclamped: oklab(0.7 -0.5 0.5) stays out of gamut", () => {
+        expectRgbClose(
+            parseColor("oklab(0.7 -0.5 0.5)")?.rgb,
+            oklabToRgb(unsafeAsOklab([0.7, -0.5, 0.5] as const)),
+            12
+        );
+    });
+
+    it("clamps only a negative hsl() saturation (CSS Color 4 §7)", () => {
+        expectRgbClose(parseColor("hsl(0 -50% 50%)")?.rgb, [0.5, 0.5, 0.5]);
+        expectRgbClose(
+            parseColor("hsl(0 150% 50%)")?.rgb,
+            [1.25, -0.25, -0.25]
+        );
+        expectRgbClose(
+            parseColor("hsl(0 100% 120%)")?.rgb,
+            hslToRgb([0, 1, 1.2], { clampInputs: false })
+        );
+    });
+});
+
+describe("parseColor: lenient syntax (documented convention)", () => {
+    it("accepts forms CSS rejects, as the product's input fields need", () => {
+        expect(parseColor("fff")?.rgb).toEqual([1, 1, 1]);
+        expect(parseColor("rgb(255 0 0 0.5)")?.alpha).toBe(0.5);
+        expectRgbClose(parseColor("rgb(255, 0 0)")?.rgb, [1, 0, 0]);
+        expectRgbClose(
+            parseColor("hsl(120, 100, 50)")?.rgb,
+            hslToRgb([120, 1, 0.5])
+        );
+    });
+
+    it("keeps rgb() channels outside [0, 255] (CSS Color 4 §5.1 clamps)", () => {
+        expectRgbClose(parseColor("rgb(300 -10 0)")?.rgb, [
+            300 / 255,
+            -10 / 255,
+            0,
+        ]);
+    });
 });
 
 describe("parseColor: contract (unrecognised → null)", () => {
+    it.each([
+        "rgb(1e400 0 0)",
+        "rgb(-1e400% 0% 0%)",
+        "rgb(255 0 0 / 1e400)",
+        "hsl(1e400deg 100% 50%)",
+        "hsl(1e308turn 100% 50%)",
+        "hsl(0 1e400% 50%)",
+        "hsv(0 100% 1e400%)",
+        "cmyk(1e400 0 0 0)",
+        "lab(50 1e400 0)",
+        "lab(50 1e308 0)",
+        "lch(50 1e400 30)",
+        "oklab(0.5 1e400 0)",
+        "oklch(0.5 1e308 30)",
+        "color(srgb 1e400 0 0)",
+        "color(display-p3 1e308 0 0)",
+    ])("rejects numeric overflow in %s", input => {
+        expect(parseColor(input)).toBeNull();
+    });
+
     it.each([
         [""],
         ["   "],
         ["not-a-color"],
         ["oklch(a b c)"],
-        ["rgb(1 2)"],
-        ["#12345"],
         ["oklch(0.5 0.1 20"],
         ["foo(1 2 3)"],
         ["rgb(255 0 0 / 1 / 2)"],

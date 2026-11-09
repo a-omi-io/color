@@ -31,11 +31,6 @@ function expectRgbClose(
     expect(actual[2]).toBeCloseTo(expected[2], digits);
 }
 
-/**
- * Byte-parity vectors: these strings must match the app-local
- * `_engine/format.ts` output verbatim so colors.omi.io can swap the
- * implementation without visual diffs (same clamping, rounding, defaults).
- */
 describe("formatHex", () => {
     it("formats lowercase #rrggbb", () => {
         expect(formatHex([1, 0, 0])).toBe("#ff0000");
@@ -127,16 +122,132 @@ describe("formatOklch", () => {
         expect(formatOklch(unsafeAsOklch([0.5, 0, 123] as const))).toBe(
             "oklch(0.5 0 none)"
         );
-        // Threshold is EPSILON_CHROMA — the convert layer's achromatic
-        // convention. An sRGB gray keeps its tiny residual chroma (~1e-4
-        // from matrix precision) and therefore a real hue, as in CSS.
-        expect(formatOklch(rgbToOklch([0.5, 0.5, 0.5]))).not.toMatch(/none/);
+        // Residual chroma of an sRGB grey stays below EPSILON_CHROMA.
+        expect(formatOklch(rgbToOklch([0.5, 0.5, 0.5]))).toBe(
+            "oklch(0.5982 0 none)"
+        );
     });
 
     it("wraps hue into [0, 360) and appends alpha", () => {
         expect(formatOklch(unsafeAsOklch([0.7, 0.1, 540] as const), 0.5)).toBe(
             "oklch(0.7 0.1 180 / 0.5)"
         );
+    });
+
+    it("wraps the hue after rounding: 359.99996 prints 0, never 360", () => {
+        expect(formatOklch(unsafeAsOklch([0.5, 0.1, 359.99996] as const))).toBe(
+            "oklch(0.5 0.1 0)"
+        );
+        expect(formatLch(unsafeAsLCh([50, 40, -0.0001] as const))).toBe(
+            "lch(50 40 0)"
+        );
+    });
+
+    it("omits an alpha that rounds to 1", () => {
+        expect(
+            formatOklch(unsafeAsOklch([0.5, 0.1, 30] as const), 0.9996)
+        ).toBe("oklch(0.5 0.1 30)");
+        expect(
+            formatOklch(unsafeAsOklch([0.5, 0.1, 30] as const), 0.9994)
+        ).toBe("oklch(0.5 0.1 30 / 0.999)");
+    });
+});
+
+describe("non-finite components", () => {
+    it("keeps large finite components finite when rounding", () => {
+        expect(formatOklab(unsafeAsOklab([0.5, 1e308, -1e308] as const))).toBe(
+            "oklab(0.5 1e+308 -1e+308)"
+        );
+    });
+
+    it("serializes missing components as none when retained in their model", () => {
+        const missing = Number.NaN;
+        expect(
+            formatOklch(unsafeAsOklch([missing, missing, missing] as const))
+        ).toBe("oklch(none none none)");
+        expect(formatOklch(unsafeAsOklch([0.5, 0.1, missing] as const))).toBe(
+            "oklch(0.5 0.1 none)"
+        );
+        expect(formatLab(unsafeAsLab([missing, 0, 0] as const))).toBe(
+            "lab(none 0 0)"
+        );
+        expect(formatRgb([missing, 0, 0], missing)).toBe(
+            "rgb(none 0 0 / none)"
+        );
+        expect(formatRgb([missing, 0, 0], undefined, { percent: true })).toBe(
+            "rgb(none 0% 0%)"
+        );
+        expect(formatHsl([missing, 0, 0], missing)).toBe("hsl(0 0% 0% / none)");
+    });
+
+    it("writes a missing hex component as 0 (CSS Color 4 §4.4), never throws", () => {
+        expect(formatHex([Number.NaN, 0.5, 1])).toBe("#0080ff");
+        expect(formatHex([1, 0, 0], Number.NaN)).toBe("#ff000000");
+    });
+
+    it("keeps a missing Oklch hue consistent across serialization and conversion", () => {
+        const oklch = unsafeAsOklch([0.5, 0.1, Number.NaN] as const);
+        const rgb = oklchToRgb(oklch);
+        expectRgbClose(parseColor(formatOklch(oklch))?.rgb, rgb, 12);
+        expect(formatHex(rgb)).toBe("#904961");
+    });
+
+    it.each([
+        {
+            missing: "red",
+            rgb: [Number.NaN, 0.5, 1],
+            expectedRgb: [0, 0.5, 1],
+            hsl: "hsl(210 100% 50%)",
+            hsv: "hsv(210 100% 100%)",
+            cmyk: "cmyk(100% 50% 0% 0%)",
+        },
+        {
+            missing: "green",
+            rgb: [1, Number.NaN, 0.5],
+            expectedRgb: [1, 0, 0.5],
+            hsl: "hsl(330 100% 50%)",
+            hsv: "hsv(330 100% 100%)",
+            cmyk: "cmyk(0% 100% 50% 0%)",
+        },
+        {
+            missing: "blue",
+            rgb: [0.5, 1, Number.NaN],
+            expectedRgb: [0.5, 1, 0],
+            hsl: "hsl(90 100% 50%)",
+            hsv: "hsv(90 100% 100%)",
+            cmyk: "cmyk(50% 0% 100% 0%)",
+        },
+        {
+            missing: "all channels",
+            rgb: [Number.NaN, Number.NaN, Number.NaN],
+            expectedRgb: [0, 0, 0],
+            hsl: "hsl(0 0% 0%)",
+            hsv: "hsv(0 0% 0%)",
+            cmyk: "cmyk(0% 0% 0% 100%)",
+        },
+    ] as const)(
+        "resolves missing $missing to zero before converting RGB models",
+        ({ rgb, expectedRgb, hsl, hsv, cmyk }) => {
+            const formats = [formatHsl(rgb), formatHsv(rgb), formatCmyk(rgb)];
+            expect(formats).toEqual([hsl, hsv, cmyk]);
+            for (const formatted of formats) {
+                expectRgbClose(parseColor(formatted)?.rgb, expectedRgb, 10);
+            }
+        }
+    );
+
+    it("throws for ±Infinity in model formats", () => {
+        expect(() =>
+            formatOklch(unsafeAsOklch([0.5, Infinity, 30] as const))
+        ).toThrow(RangeError);
+        expect(() =>
+            formatLch(unsafeAsLCh([50, 40, -Infinity] as const))
+        ).toThrow(RangeError);
+    });
+
+    it("omits a hex alpha byte that rounds to ff", () => {
+        expect(formatHex([1, 0, 0], 0.999)).toBe("#ff0000");
+        expect(formatHex([1, 0, 0], 0.997)).toBe("#ff0000fe");
     });
 });
 
@@ -202,7 +313,6 @@ describe("parse ∘ format round-trips", () => {
             );
             expectRgbClose(percent?.rgb, oklchToRgb(oklch), 2);
 
-            // Higher precision tightens the round-trip accordingly.
             const precise = parseColor(
                 formatOklch(oklch, undefined, { decimals: 7 })
             );

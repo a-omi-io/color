@@ -1,7 +1,7 @@
 {
   "name": "@omi-io/color-css",
   "scopeCommitName": "@:css",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CSS color string parsing and serialization: hex, rgb(), hsl(), hsv(), cmyk(), lab(), lch(), oklab(), oklch(), color(), named colors — normalized to canonical [0,1] sRGB plus alpha.",
   "keywords": [
     "color",
@@ -42,9 +42,9 @@
     "tsc-check": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@omi-io/color-convert": "^0.3.0",
-    "@omi-io/color-core": "^0.1.0",
-    "@omi-io/color-models": "^0.2.0"
+    "@omi-io/color-convert": "^0.4.0",
+    "@omi-io/color-core": "^0.2.0",
+    "@omi-io/color-models": "^0.3.0"
   },
   "devDependencies": {
     "@omi-io/pkg-scripts": "v2.5.0",
