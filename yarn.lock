@@ -2752,13 +2752,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@omi-io/color-convert@npm:^0.3.0, @omi-io/color-convert@workspace:packages/color-convert":
+"@omi-io/color-convert@npm:^0.4.0, @omi-io/color-convert@workspace:packages/color-convert":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-convert@workspace:packages/color-convert"
   dependencies:
-    "@omi-io/color-core": "npm:^0.1.0"
-    "@omi-io/color-datasets": "npm:^0.1.0"
-    "@omi-io/color-models": "npm:^0.2.0"
+    "@omi-io/color-core": "npm:^0.2.0"
+    "@omi-io/color-datasets": "npm:^0.2.0"
+    "@omi-io/color-models": "npm:^0.3.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
@@ -2769,7 +2769,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@omi-io/color-core@npm:^0.1.0, @omi-io/color-core@workspace:packages/color-core":
+"@omi-io/color-core@npm:^0.2.0, @omi-io/color-core@workspace:packages/color-core":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-core@workspace:packages/color-core"
   dependencies:
@@ -2788,9 +2788,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omi-io/color-css@workspace:packages/color-css"
   dependencies:
-    "@omi-io/color-convert": "npm:^0.3.0"
-    "@omi-io/color-core": "npm:^0.1.0"
-    "@omi-io/color-models": "npm:^0.2.0"
+    "@omi-io/color-convert": "npm:^0.4.0"
+    "@omi-io/color-core": "npm:^0.2.0"
+    "@omi-io/color-models": "npm:^0.3.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
@@ -2801,11 +2801,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@omi-io/color-datasets@npm:^0.1.0, @omi-io/color-datasets@workspace:packages/color-datasets":
+"@omi-io/color-datasets@npm:^0.2.0, @omi-io/color-datasets@workspace:packages/color-datasets":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-datasets@workspace:packages/color-datasets"
   dependencies:
-    "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/color-core": "npm:^0.2.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
@@ -2820,9 +2820,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@omi-io/color-gamut@workspace:packages/color-gamut"
   dependencies:
-    "@omi-io/color-convert": "npm:^0.3.0"
-    "@omi-io/color-core": "npm:^0.1.0"
-    "@omi-io/color-models": "npm:^0.2.0"
+    "@omi-io/color-convert": "npm:^0.4.0"
+    "@omi-io/color-core": "npm:^0.2.0"
+    "@omi-io/color-datasets": "npm:^0.2.0"
+    "@omi-io/color-models": "npm:^0.3.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
@@ -2833,11 +2834,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@omi-io/color-models@npm:^0.2.0, @omi-io/color-models@workspace:packages/color-models":
+"@omi-io/color-models@npm:^0.3.0, @omi-io/color-models@workspace:packages/color-models":
   version: 0.0.0-use.local
   resolution: "@omi-io/color-models@workspace:packages/color-models"
   dependencies:
-    "@omi-io/color-core": "npm:^0.1.0"
+    "@omi-io/color-core": "npm:^0.2.0"
     "@omi-io/pkg-scripts": "npm:v2.5.0"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^20.11.30"
