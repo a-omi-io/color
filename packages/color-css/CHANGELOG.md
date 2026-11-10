@@ -1,3 +1,17 @@
+## 0.4.0 (2026-11-10)
+
+### 🚀 Features
+
+- ⚠️  **@:css:** hwb() parsing and formatHwb, bare numbers in cmyk() are percentages ([cf35d76](https://github.com/a-omi-io/color/commit/cf35d76))
+
+### ⚠️  Breaking Changes
+
+- **@:css:** hwb() parsing and formatHwb, bare numbers in cmyk() are percentages  ([cf35d76](https://github.com/a-omi-io/color/commit/cf35d76))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.3.0 (2026-11-09)
 
 ### 🩹 Fixes
