@@ -9,9 +9,9 @@ import type {
 import type { ComponentScale } from "./types";
 
 export const RGB_CHANNEL: ComponentScale = { number: 1 / 255, percent: 0.01 };
-/** HSL/HSV S/L/V: bare numbers use percentage units. */
+/** Bare numbers in percentage slots use percentage units. */
 export const PERCENTAGE_UNIT: ComponentScale = { number: 0.01, percent: 0.01 };
-/** `cmyk()` / `color()` channels: bare numbers are already `[0,1]` units. */
+/** `device-cmyk()` / `color()`: bare numbers are fractions in `[0, 1]`. */
 export const UNIT_OR_PERCENT: ComponentScale = { number: 1, percent: 0.01 };
 export const LAB_LIGHTNESS: ComponentScale = { number: 1, percent: 1 };
 export const LAB_AB: ComponentScale = { number: 1, percent: 1.25 };

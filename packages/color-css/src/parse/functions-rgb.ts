@@ -1,11 +1,16 @@
-import { hslToRgb, hsvToRgb } from "@omi-io/color-convert";
+import { hslToRgb, hsvToRgb, hwbToRgb } from "@omi-io/color-convert";
 import type { HSV } from "@omi-io/color-core/types";
 import {
     parseCmykFunction,
     parseColorFunction,
     parseTripletFunction,
 } from "./channels";
-import { clampNegativeToZero, PERCENTAGE_UNIT, RGB_CHANNEL } from "./scales";
+import {
+    clampNegativeToZero,
+    PERCENTAGE_UNIT,
+    RGB_CHANNEL,
+    UNIT_OR_PERCENT,
+} from "./scales";
 import type { ParsedColor } from "./types";
 
 export function parseRgbLikeFunction(
@@ -44,9 +49,21 @@ export function parseRgbLikeFunction(
             );
             return parsed ? { ...parsed, source: "hsv" } : null;
         }
-        case "cmyk":
+        case "hwb": {
+            // Bare W/B values use percentage units as a parser convention.
+            const parsed = parseTripletFunction(
+                body,
+                ["hue", PERCENTAGE_UNIT, PERCENTAGE_UNIT],
+                hwb => hwbToRgb(hwb)
+            );
+            return parsed ? { ...parsed, source: "hwb" } : null;
+        }
+        case "cmyk": {
+            const parsed = parseCmykFunction(body, PERCENTAGE_UNIT);
+            return parsed ? { ...parsed, source: "cmyk" } : null;
+        }
         case "device-cmyk": {
-            const parsed = parseCmykFunction(body);
+            const parsed = parseCmykFunction(body, UNIT_OR_PERCENT);
             return parsed ? { ...parsed, source: "cmyk" } : null;
         }
         case "color": {

@@ -3,27 +3,17 @@
  * missing channels as `none`; hex and model conversions replace them with 0.
  */
 
-import { rgbToCmyk, rgbToHsl, rgbToHsv } from "@omi-io/color-convert";
 import { clampUnit, unitToRgb8 } from "@omi-io/color-core";
 import type { RGB } from "@omi-io/color-core/types";
+import { missingChannelsAsZero, percentToken } from "./display-tokens";
 import {
     alphaSuffix,
-    DEFAULT_DECIMALS,
-    hueToken,
     missingAsZero,
     numberToken,
     pad2,
     toBytes,
 } from "./shared";
-import type { FormatOptions, FormatRgbOptions } from "./types";
-
-function percentToken(unit: number, decimals: number): string {
-    return numberToken(clampUnit(unit) * 100, decimals, "%");
-}
-
-function missingChannelsAsZero([r, g, b]: RGB): RGB {
-    return [missingAsZero(r), missingAsZero(g), missingAsZero(b)];
-}
+import type { FormatRgbOptions } from "./types";
 
 /**
  * `[0,1]` RGB (+alpha) → `#rrggbb` / `#rrggbbaa` (lowercase). Out-of-gamut
@@ -59,35 +49,4 @@ export function formatRgb(
         { decimals }
     ).map(byte => numberToken(byte, decimals));
     return `rgb(${bytes.join(" ")}${alphaSuffix(alpha)})`;
-}
-
-/** `[0,1]` RGB (+alpha) → `hsl(H S% L%)` / `hsl(H S% L% / A)`. */
-export function formatHsl(
-    rgb: RGB,
-    alpha?: number,
-    options?: FormatOptions
-): string {
-    const decimals = options?.decimals ?? DEFAULT_DECIMALS;
-    const [h, s, l] = rgbToHsl(missingChannelsAsZero(rgb));
-    return `hsl(${hueToken(h, decimals)} ${percentToken(s, decimals)} ${percentToken(l, decimals)}${alphaSuffix(alpha)})`;
-}
-
-/** `[0,1]` RGB (+alpha) → `hsv(H S% V%)` / `hsv(H S% V% / A)`. */
-export function formatHsv(
-    rgb: RGB,
-    alpha?: number,
-    options?: FormatOptions
-): string {
-    const decimals = options?.decimals ?? DEFAULT_DECIMALS;
-    const [h, s, v] = rgbToHsv(missingChannelsAsZero(rgb));
-    return `hsv(${hueToken(h, decimals)} ${percentToken(s, decimals)} ${percentToken(v, decimals)}${alphaSuffix(alpha)})`;
-}
-
-/** `[0,1]` RGB → `cmyk(C% M% Y% K%)`. */
-export function formatCmyk(rgb: RGB, options?: FormatOptions): string {
-    const decimals = options?.decimals ?? DEFAULT_DECIMALS;
-    const channels = rgbToCmyk(missingChannelsAsZero(rgb)).map(value =>
-        percentToken(value, decimals)
-    );
-    return `cmyk(${channels.join(" ")})`;
 }

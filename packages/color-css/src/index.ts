@@ -7,6 +7,7 @@ export {
     formatHex,
     formatHsl,
     formatHsv,
+    formatHwb,
     formatLab,
     formatLch,
     formatOklab,

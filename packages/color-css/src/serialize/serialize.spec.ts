@@ -12,6 +12,7 @@ import {
     formatHex,
     formatHsl,
     formatHsv,
+    formatHwb,
     formatLab,
     formatLch,
     formatOklab,
@@ -97,6 +98,25 @@ describe("formatHsl / formatHsv / formatCmyk", () => {
 
     it("formats cmyk", () => {
         expect(formatCmyk([1, 0, 0])).toBe("cmyk(0% 100% 100% 0%)");
+    });
+
+    it("formats hwb, and parseColor reads it back", () => {
+        expect(formatHwb([1, 0, 0])).toBe("hwb(0 0% 0%)");
+        expect(formatHwb([0.2, 0.7, 0.2])).toBe("hwb(120 20% 30%)");
+        expect(formatHwb([0.2, 0.7, 0.2], 0.5)).toBe("hwb(120 20% 30% / 0.5)");
+        const gray = 128 / 255;
+        expect(formatHwb([gray, gray, gray])).toBe("hwb(0 50.196% 49.804%)");
+        for (const rgb of [
+            [1, 128 / 255, 64 / 255],
+            [0.2, 0.4, 0.6],
+            [18 / 255, 201 / 255, 160 / 255],
+        ] as const) {
+            expectRgbClose(
+                parseColor(formatHwb([...rgb], undefined, { decimals: 9 }))
+                    ?.rgb,
+                [...rgb]
+            );
+        }
     });
 });
 

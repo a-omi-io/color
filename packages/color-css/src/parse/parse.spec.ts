@@ -165,6 +165,42 @@ describe("parseColor: hsl() / hsv()", () => {
     });
 });
 
+describe("parseColor: hwb()", () => {
+    // Reference: colour-science 0.4.4 native HSV results mapped to HWB;
+    // see `hwbInverse` in color-convert's __fixtures__/colour-science.json.
+    it("parses hwb() by CSS Color 4 §8", () => {
+        const parsed = parseColor("hwb(120 20% 30%)");
+        expect(parsed?.source).toBe("hwb");
+        expectRgbClose(parsed?.rgb, [0.2, 0.7, 0.2]);
+        expectRgbClose(parseColor("hwb(0 0% 0%)")?.rgb, [1, 0, 0]);
+        expectRgbClose(parseColor("hwb(210 10% 50%)")?.rgb, [0.1, 0.3, 0.5]);
+        expectRgbClose(
+            parseColor("hwb(350 25% 10%)")?.rgb,
+            [0.9, 0.25, 0.3583333333333333]
+        );
+    });
+
+    it("reads a bare number as a percentage, hue units and alpha", () => {
+        expectRgbClose(parseColor("hwb(90 40 20)")?.rgb, [0.6, 0.8, 0.4]);
+        expectRgbClose(
+            parseColor("hwb(0.25turn 40% 20%)")?.rgb,
+            [0.6, 0.8, 0.4]
+        );
+        expect(parseColor("hwb(120 20% 30% / 50%)")?.alpha).toBe(0.5);
+        expectRgbClose(parseColor("hwb(none 20% 30%)")?.rgb, [0.7, 0.2, 0.2]);
+    });
+
+    it("normalises whiteness + blackness ≥ 100 % to a grey", () => {
+        expectRgbClose(parseColor("hwb(300 60% 60%)")?.rgb, [0.5, 0.5, 0.5]);
+        expectRgbClose(parseColor("hwb(45 100% 0%)")?.rgb, [1, 1, 1]);
+        expectRgbClose(parseColor("hwb(0 0% 100%)")?.rgb, [0, 0, 0]);
+    });
+
+    it("rejects a wrong argument count", () => {
+        expect(parseColor("hwb(120 20%)")).toBeNull();
+    });
+});
+
 describe("parseColor: cmyk()", () => {
     it("parses percentage and unit forms", () => {
         const expected = cmykToRgb([0, 0.81, 0.81, 0.3]);
@@ -174,6 +210,24 @@ describe("parseColor: cmyk()", () => {
             expected
         );
         expect(parseColor("cmyk(0% 81% 81% 30%)")?.source).toBe("cmyk");
+    });
+
+    it("cmyk(): a bare number is a percentage, like hsl() and hsv()", () => {
+        const expected = cmykToRgb([0, 0.81, 0.81, 0.3]);
+        expectRgbClose(parseColor("cmyk(0 81 81 30)")?.rgb, expected);
+        expectRgbClose(parseColor("cmyk(0, 81, 81, 30)")?.rgb, expected);
+        expectRgbClose(parseColor("cmyk(0 81% 81 30%)")?.rgb, expected);
+    });
+
+    it("device-cmyk(): a bare number stays a [0,1] unit, as CSS defines it", () => {
+        expectRgbClose(
+            parseColor("device-cmyk(0 1 1 0)")?.rgb,
+            cmykToRgb([0, 1, 1, 0])
+        );
+        expectRgbClose(
+            parseColor("device-cmyk(0% 81% 81% 30%)")?.rgb,
+            cmykToRgb([0, 0.81, 0.81, 0.3])
+        );
     });
 
     it("takes alpha only after a slash", () => {

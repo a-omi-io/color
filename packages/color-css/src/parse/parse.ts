@@ -9,7 +9,7 @@ const FUNCTION_PATTERN = /^([a-z-]+)\(\s*([\s\S]*?)\s*\)$/;
 /**
  * Parse any supported CSS color string: named colors (incl. `transparent`),
  * `#rgb[a]` / `#rrggbb[aa]` (leading `#` optional), `rgb[a]()`, `hsl[a]()`,
- * `hsv[a]()`, `cmyk()` / `device-cmyk()`, `lab()`, `lch()`, `oklab()`,
+ * `hwb()`, `hsv[a]()`, `cmyk()` / `device-cmyk()`, `lab()`, `lch()`, `oklab()`,
  * `oklch()` and `color(srgb | display-p3 …)`. Case-insensitive; whitespace,
  * `,` and `/`-before-alpha separators are accepted.
  * Returns sRGB-encoded RGB (possibly outside `[0, 1]`) and clamped alpha.

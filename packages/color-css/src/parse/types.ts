@@ -7,6 +7,7 @@ export type CssColorSyntax =
     | "rgb"
     | "hsl"
     | "hsv"
+    | "hwb"
     | "cmyk"
     | "lab"
     | "lch"

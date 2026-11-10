@@ -1,10 +1,3 @@
-/**
- * Generic channel builders shared by the function dispatchers: parse a
- * function body's components + alpha, then hand the components to a
- * colorspace conversion. Channels are NOT clamped — out-of-gamut input
- * yields out-of-gamut RGB. Internal to the parser.
- */
-
 import { cmykToRgb, convertRGBColorspace } from "@omi-io/color-convert";
 import type { CMYK, RGB, Vec3 } from "@omi-io/color-core/types";
 import { unsafeAsEncodedRGB } from "@omi-io/color-models";
@@ -15,7 +8,7 @@ import {
     parseComponents,
     splitFunctionArgs,
 } from "./tokens";
-import type { ComponentKind, ParsedChannels } from "./types";
+import type { ComponentKind, ComponentScale, ParsedChannels } from "./types";
 
 export function parseTripletFunction(
     body: string,
@@ -31,14 +24,20 @@ export function parseTripletFunction(
     return { rgb: toRgb(asVec3(components)), alpha };
 }
 
-export function parseCmykFunction(body: string): ParsedChannels | null {
+/**
+ * Scale bare numbers as percentages for `cmyk()` or unit fractions for `device-cmyk()`.
+ */
+export function parseCmykFunction(
+    body: string,
+    scale: ComponentScale
+): ParsedChannels | null {
     const args = splitFunctionArgs(body, 4, false);
     if (!args) return null;
     const components = parseComponents(args.components, [
-        UNIT_OR_PERCENT,
-        UNIT_OR_PERCENT,
-        UNIT_OR_PERCENT,
-        UNIT_OR_PERCENT,
+        scale,
+        scale,
+        scale,
+        scale,
     ]);
     if (!components) return null;
     const alpha = parseAlphaComponent(args.alphaToken);
