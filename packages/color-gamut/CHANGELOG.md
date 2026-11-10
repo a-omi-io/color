@@ -1,3 +1,13 @@
+## 0.3.1 (2026-11-10)
+
+### 🧹 Chores
+
+- **@:gamut:** retarget to @omi-io/color-convert@^0.5.0 — packages/color-gamut ([8beb54e](https://github.com/a-omi-io/color/commit/8beb54e))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.3.0 (2026-11-09)
 
 ### 🩹 Fixes
