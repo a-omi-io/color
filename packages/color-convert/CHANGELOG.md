@@ -1,3 +1,13 @@
+## 0.5.0 (2026-11-10)
+
+### 🚀 Features
+
+- **@:convert:** hwb conversions and graph node, rgbToHsl saturation never above 1 ([1ca5152](https://github.com/a-omi-io/color/commit/1ca5152))
+
+### ❤️ Thank You
+
+- Arman Khilko @a-omi-io
+
 ## 0.4.0 (2026-11-09)
 
 ### 🩹 Fixes
