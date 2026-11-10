@@ -11,6 +11,7 @@ export type ColorEncodingId =
     | "Oklch"
     | "HSL"
     | "HSV"
+    | "HWB"
     | "CMYK"
     | "YCbCr BT.709";
 export type ColorModelId =
@@ -22,6 +23,7 @@ export type ColorModelId =
     | "Oklch"
     | "HSL"
     | "HSV"
+    | "HWB"
     | "CMYK"
     | "YCbCr";
 /**
@@ -35,7 +37,7 @@ export type ColorModelId =
  * - `"lch"` — CIE `L in [0, 100]`, `C >= 0`, `h` in degrees `[0, 360)`;
  * - `"oklab"` — `L in [0, 1]`, `a`/`b` unbounded;
  * - `"oklch"` — `L in [0, 1]`, `C >= 0`, `h` in degrees `[0, 360)`;
- * - `"hue-unit"` — HSL / HSV: `h` in degrees `[0, 360)`, the rest in `[0, 1]`.
+ * - `"hue-unit"` — HSL / HSV / HWB: `h` in degrees `[0, 360)`, the rest in `[0, 1]`.
  */
 export type DomainId =
     | "unit"

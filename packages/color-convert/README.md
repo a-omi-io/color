@@ -53,7 +53,7 @@ Many encodings can be reached from one another through a small **directed graph*
 - `Lab D50`
 - `LCh` (cylindrical form of `Lab D50` — same whitepoint, no separate illuminant suffix)
 - `Oklab`, `Oklch` (D65 by definition of the model — no illuminant suffix)
-- `HSL`, `HSV`, `CMYK`
+- `HSL`, `HSV`, `HWB`, `CMYK`
 - `YCbCr BT.709` (full or limited range via the lower-level `rgbToYCbCr` / `yCbCrToRgb` options)
 
 `findConversionPath(from, to)` returns a shortest path as a list of edges. `convertByPipeline(value, from, to, options?)` walks that path and applies each step.
@@ -111,7 +111,7 @@ The graph’s `Lab D50` legs use the package’s reference **D50** whitepoint fr
 
 ### Cylindrical and print/device encodings
 
-- **`rgbToHsl`** / **`hslToRgb`**, **`rgbToHsv`** / **`hsvToRgb`**
+- **`rgbToHsl`** / **`hslToRgb`**, **`rgbToHsv`** / **`hsvToRgb`**, **`rgbToHwb`** / **`hwbToRgb`** (type **`HWB`**)
 - **`rgbToCmyk`** / **`cmykToRgb`** (optional **`RgbToCmykOptions`**)
 - **`rgbToYCbCr`** / **`yCbCrToRgb`** with **`YCBCR_ENCODINGS`**, **`YCbCrEncodingId`**, full vs limited **`range`**, and **`rgbToLuma`**
 
@@ -120,7 +120,9 @@ These generally operate on **unit-domain** RGB unless documented otherwise (YCbC
 Edges and conventions:
 
 - **`hslToRgb`** is the CSS Color 4 sample code (§7.1). A non-finite hue counts as `0`, as CSS treats a missing component (until 0.3.0 `NaN` gave black or grey; `hsvToRgb` gave a partly-`NaN` result). `S` and `L` are clamped to `[0, 1]` unless `{ clampInputs: false }` (`HslToRgbOptions`). That mode converts both values without clamping, so out-of-range values can give out-of-gamut RGB. Like the CSS sample, it assumes the caller already clamped negative `S` to `0` at parse time; `@omi-io/color-css` does so before calling it.
-- **Inputs outside `[0, 1]` are clamped** by `rgbToHsl`, `rgbToHsv`, `rgbToCmyk` and `rgbToYCbCr`: an out-of-gamut colour converts as the clipped colour. A convention, not an error.
+- **`rgbToHsl` caps saturation at `1`** to prevent floating-point overshoot.
+- **HWB** (since 0.5.0) is `[H, W, B]`: hue in degrees, whiteness and blackness as fractions `[0, 1]`. `hwbToRgb` is CSS Color 4 §8.1: `W` and `B` are clamped to `[0, 1]`, and when they sum to one or more the result is the grey `W / (W + B)`. `rgbToHwb` of an achromatic colour has `H = 0`. `"HWB"` is also a node of the conversion graph.
+- **Inputs outside `[0, 1]` are clamped** by `rgbToHsl`, `rgbToHsv`, `rgbToHwb`, `rgbToCmyk` and `rgbToYCbCr`: an out-of-gamut colour converts as the clipped colour. A convention, not an error.
 - **Y′CbCr.** The full-range API uses Cb/Cr centred at `0.5` in `[0, 1]`. When comparing with `colour-science 0.4.4` `RGB_to_YCbCr(out_legal=False)`, add `0.5` to its signed Cb/Cr. Limited range takes `bitDepth` (`8 | 10 | 12`, default 8) and normalizes the ITU legal-range codes by `2^n − 1`: luma uses `(219·E + 16)·2^(n−8)` and chroma uses `(224·E + 128)·2^(n−8)`. That output is independently checked against `RGB_to_YCbCr(out_legal=True, out_int=False, out_bits=n)`.
 - **Rec.2020** uses the exact `α = 1.09929682680944`, `β = 0.018053968510807` of BT.2020-2; the practical 10-bit pair is `1.099 / 0.018`, the 12-bit pair `1.0993 / 0.0181`. **Rec.709** keeps BT.709's rounded `α = 1.099`, `β = 0.018`, so its encoder has a small gap at the join. The inverse switches at `encode(β) ≈ 0.081248`, preserving the inverse of produced codes; codes inside the gap have no exact preimage.
 - ICtCp and JzAzBz exist only as branded types in `@omi-io/color-models`: this package has no conversions for them.

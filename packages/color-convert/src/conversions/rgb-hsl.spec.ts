@@ -54,4 +54,20 @@ describe("rgb-hsl", () => {
             expect(restored[2]).toBeCloseTo(rgb[2], 12);
         });
     });
+
+    it("never returns a saturation above 1", () => {
+        expect(rgbToHsl([1, 250 / 255, 250 / 255])[1]).toBe(1);
+        expect(rgbToHsl([0, 100 / 255, 0])[1]).toBe(1);
+        for (let a = 0; a < 256; a += 1) {
+            for (let b = 0; b < 256; b += 5) {
+                for (const rgb of [
+                    [1, a / 255, b / 255],
+                    [a / 255, 0, b / 255],
+                    [a / 255, b / 255, 1],
+                ] as const) {
+                    expect(rgbToHsl([...rgb])[1]).toBeLessThanOrEqual(1);
+                }
+            }
+        }
+    });
 });

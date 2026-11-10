@@ -48,6 +48,12 @@ Cb/Cr receive a 0.5 offset to match this API. Limited-range output uses
 normalized floating-point code values at 8, 10 and 12 bits. BT.2020 transfer
 samples select the native `CONSTANTS_BT2020_PRECISE`.
 
+HWB is not a native colour-science model. The `hwb` and `hwbInverse` rows are
+native `RGB_to_HSV` / `HSV_to_RGB` mapped by the definition of HWB (Smith &
+Lyons 1996; CSS Color 4 section 8): `w = (1 − s)·v`, `b = 1 − v`.
+Forward `hwb` rows include achromatic colours. Only `hwbInverse` omits inputs
+with `w + b ≥ 1`, whose grey result `w / (w + b)` is tested separately.
+
 Known differences are explicit:
 
 - Native Oklab uses the original matrices; this library uses the CSS matrices

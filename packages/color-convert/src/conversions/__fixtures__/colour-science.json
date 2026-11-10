@@ -22,7 +22,8 @@
       "rgbModels": "Native RGB_to_HSL/HSV hue multiplied by 360; native RGB_to_CMY then CMY_to_CMYK; inputs in [0,1].",
       "oklab": "Unmodified native 0.4.4 Oklab matrices in both directions; intentionally differs from our CSS-corrected matrices. No fixture-side matrix substitution.",
       "transfer": "Native positive-domain CCTFs for every working space; BT.2020 uses native CONSTANTS_BT2020_PRECISE, not the rounded 10-bit default. Negative CSS sign extension is outside this parity dataset. Native sRGB decode splits at encode(0.0031308), slightly below our standard 0.04045. Native 0.4.4 BT.2020 inverse fails to forward PRECISE constants when computing its branch threshold; it calls default oetf_BT2020(beta). Those narrow decode intervals have explicit decodeDifference classifications. Probes straddle branch thresholds by 1e-10 to avoid NumPy/JS pow ulps choosing different discontinuous branches.",
-      "cmccat97": "The CMCCAT97 compatibility identifier is the fully adapted linearized CIECAM97s/Bradford transform of ICC.1:2004-10 Annex E.3. It is not the complete nonlinear model and is excluded from native CMCCAT97 parity."
+      "cmccat97": "The CMCCAT97 compatibility identifier is the fully adapted linearized CIECAM97s/Bradford transform of ICC.1:2004-10 Annex E.3. It is not the complete nonlinear model and is excluded from native CMCCAT97 parity.",
+      "hwb": "Not a native model. HWB (Smith & Lyons 1996; CSS Color 4 section 8) is defined on HSV: w = (1 - s) * v, b = 1 - v, so v = 1 - b and s = 1 - w / v. Forward rows are native RGB_to_HSV mapped by that definition; inverse rows are native HSV_to_RGB of the mapped HSV. Hue in degrees, whiteness and blackness in [0, 1]. Forward rows include achromatic samples. hwbInverse omits inputs with w + b >= 1; the grey result w / (w + b) is tested separately."
     }
   },
   "rgbSpaces": [
@@ -19770,6 +19771,382 @@
       "encoded": 1.0,
       "decoded": 1.0,
       "decodeDifference": null
+    }
+  ],
+  "hwb": [
+    {
+      "rgb": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hwb": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "hwb": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hwb": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hwb": [
+        120.00000000000001,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hwb": [
+        240.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        0.18,
+        0.18,
+        0.18
+      ],
+      "hwb": [
+        0.0,
+        0.18,
+        0.8200000000000001
+      ]
+    },
+    {
+      "rgb": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "hwb": [
+        209.99999999999997,
+        0.19999999999999993,
+        0.19999999999999996
+      ]
+    },
+    {
+      "rgb": [
+        0.3120873979578297,
+        0.7611214887547236,
+        0.9943799147652342
+      ],
+      "hwb": [
+        200.51247114085118,
+        0.3120873979578297,
+        0.005620085234765759
+      ]
+    },
+    {
+      "rgb": [
+        1.0,
+        1.0,
+        0.0
+      ],
+      "hwb": [
+        59.999999999999986,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        0.0,
+        1.0,
+        1.0
+      ],
+      "hwb": [
+        179.99999999999997,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "hwb": [
+        300.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "rgb": [
+        0.9807941899875345,
+        0.34479460931306827,
+        0.7873557708143631
+      ],
+      "hwb": [
+        318.24891950098777,
+        0.3447946093130683,
+        0.019205810012465463
+      ]
+    },
+    {
+      "rgb": [
+        0.4192119310552217,
+        0.8477874723141221,
+        0.39445101117056114
+      ],
+      "hwb": [
+        116.72284203804824,
+        0.3944510111705611,
+        0.1522125276858779
+      ]
+    },
+    {
+      "rgb": [
+        0.40904547614183306,
+        0.6360024197965706,
+        0.1510685315834177
+      ],
+      "hwb": [
+        88.08097546958552,
+        0.15106853158341774,
+        0.3639975802034294
+      ]
+    },
+    {
+      "rgb": [
+        0.18006109256606295,
+        0.8556107097702963,
+        0.6575864619902991
+      ],
+      "hwb": [
+        162.41216549574656,
+        0.18006109256606298,
+        0.1443892902297037
+      ]
+    },
+    {
+      "rgb": [
+        0.2584922054848843,
+        0.17577251488293766,
+        0.12866001010294525
+      ],
+      "hwb": [
+        21.772336811249676,
+        0.12866001010294525,
+        0.7415077945151157
+      ]
+    },
+    {
+      "rgb": [
+        0.28700522983996724,
+        0.014262519460011225,
+        0.6633439438746511
+      ],
+      "hwb": [
+        265.2118794457188,
+        0.014262519460011228,
+        0.3366560561253489
+      ]
+    },
+    {
+      "rgb": [
+        0.15698593752169498,
+        0.7954794166859457,
+        0.8172602151999643
+      ],
+      "hwb": [
+        181.9792500707985,
+        0.15698593752169496,
+        0.18273978480003572
+      ]
+    },
+    {
+      "rgb": [
+        0.5618478160178499,
+        0.04941488639270353,
+        0.9034707742742912
+      ],
+      "hwb": [
+        275.99995763014,
+        0.049414886392703486,
+        0.09652922572570877
+      ]
+    }
+  ],
+  "hwbInverse": [
+    {
+      "hwb": [
+        0,
+        0,
+        0
+      ],
+      "rgb": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "hwb": [
+        120,
+        0.2,
+        0.3
+      ],
+      "rgb": [
+        0.20000000000000007,
+        0.7,
+        0.20000000000000007
+      ]
+    },
+    {
+      "hwb": [
+        210,
+        0.1,
+        0.5
+      ],
+      "rgb": [
+        0.09999999999999998,
+        0.3,
+        0.5
+      ]
+    },
+    {
+      "hwb": [
+        350,
+        0.25,
+        0.1
+      ],
+      "rgb": [
+        0.9,
+        0.25,
+        0.35833333333333356
+      ]
+    },
+    {
+      "hwb": [
+        90,
+        0.4,
+        0.2
+      ],
+      "rgb": [
+        0.6000000000000001,
+        0.8,
+        0.4
+      ]
+    },
+    {
+      "hwb": [
+        45,
+        0.05,
+        0.6
+      ],
+      "rgb": [
+        0.4,
+        0.3125,
+        0.05
+      ]
+    },
+    {
+      "hwb": [
+        275,
+        0.33,
+        0.33
+      ],
+      "rgb": [
+        0.5283333333333332,
+        0.33,
+        0.6699999999999999
+      ]
+    },
+    {
+      "hwb": [
+        180,
+        0,
+        0.5
+      ],
+      "rgb": [
+        0.0,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "hwb": [
+        60,
+        0.5,
+        0
+      ],
+      "rgb": [
+        1.0,
+        1.0,
+        0.5
+      ]
+    },
+    {
+      "hwb": [
+        300,
+        0.15,
+        0.8
+      ],
+      "rgb": [
+        0.19999999999999996,
+        0.15,
+        0.19999999999999996
+      ]
+    },
+    {
+      "hwb": [
+        15,
+        0.7,
+        0.1
+      ],
+      "rgb": [
+        0.9,
+        0.75,
+        0.7
+      ]
+    },
+    {
+      "hwb": [
+        240,
+        0.02,
+        0.02
+      ],
+      "rgb": [
+        0.02000000000000002,
+        0.02000000000000002,
+        0.98
+      ]
     }
   ]
 }

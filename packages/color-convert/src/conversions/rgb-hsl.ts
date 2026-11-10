@@ -22,7 +22,7 @@ function hueFromRgb(max: number, delta: number, [r, g, b]: RGB): number {
 
 /**
  * sRGB-encoded RGB → HSL. Inputs are clamped to `[0, 1]`; achromatic input
- * yields h = 0 and s = 0.
+ * yields h = 0 and s = 0. S never exceeds 1.
  */
 export function rgbToHsl(rgb: RGB): HSL {
     const [r, g, b] = [clampUnit(rgb[0]), clampUnit(rgb[1]), clampUnit(rgb[2])];
@@ -30,7 +30,8 @@ export function rgbToHsl(rgb: RGB): HSL {
     const min = Math.min(r, g, b);
     const delta = max - min;
     const l = (max + min) / 2;
-    const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    // Floating-point rounding can push saturation slightly above 1.
+    const s = delta === 0 ? 0 : Math.min(1, delta / (1 - Math.abs(2 * l - 1)));
     const h = wrapHueDegrees(hueFromRgb(max, delta, [r, g, b]));
     return [h, s, l];
 }

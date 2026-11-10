@@ -30,6 +30,7 @@ export { decodeRGB, encodeRGB, rgbToXYZ, xyzToRGB } from "./rgb-xyz";
 export { convertRGBColorspace } from "./rgb-colorspace";
 export { rgbToHsl, hslToRgb, type HslToRgbOptions } from "./rgb-hsl";
 export { rgbToHsv, hsvToRgb } from "./rgb-hsv";
+export { rgbToHwb, hwbToRgb, type HWB } from "./rgb-hwb";
 export { rgbToCmyk, cmykToRgb, type RgbToCmykOptions } from "./rgb-cmyk";
 export {
     YCBCR_ENCODINGS,

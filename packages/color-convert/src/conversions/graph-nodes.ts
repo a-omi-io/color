@@ -13,6 +13,7 @@ export const CONVERSION_NODES: Record<ColorEncodingId, ConversionNode> = {
     Oklch: { id: "Oklch", model: "Oklch", domain: "oklch" },
     HSL: { id: "HSL", model: "HSL", domain: "hue-unit" },
     HSV: { id: "HSV", model: "HSV", domain: "hue-unit" },
+    HWB: { id: "HWB", model: "HWB", domain: "hue-unit" },
     CMYK: { id: "CMYK", model: "CMYK", domain: "unit" },
     "YCbCr BT.709": { id: "YCbCr BT.709", model: "YCbCr", domain: "unit" },
 };

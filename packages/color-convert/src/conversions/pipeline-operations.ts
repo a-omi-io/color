@@ -20,6 +20,7 @@ import { oklabToOklch, oklchToOklab } from "./oklab-oklch";
 import { cmykToRgb, rgbToCmyk } from "./rgb-cmyk";
 import { hslToRgb, rgbToHsl } from "./rgb-hsl";
 import { hsvToRgb, rgbToHsv } from "./rgb-hsv";
+import { hwbToRgb, rgbToHwb, type HWB } from "./rgb-hwb";
 import { decodeRGB, encodeRGB, rgbToXYZ, xyzToRGB } from "./rgb-xyz";
 import { rgbToYCbCr, yCbCrToRgb } from "./rgb-ycbcr";
 import { labToXYZ, xyzToLab } from "./xyz-lab";
@@ -71,6 +72,10 @@ export function applyConversionOperation(
             return rgbToHsv(asVec3<RGB>(value));
         case "hsvToRgb":
             return hsvToRgb(asVec3<HSV>(value));
+        case "rgbToHwb":
+            return rgbToHwb(asVec3<RGB>(value));
+        case "hwbToRgb":
+            return hwbToRgb(asVec3<HWB>(value));
         case "rgbToCmyk":
             return rgbToCmyk(asVec3<RGB>(value));
         case "cmykToRgb":

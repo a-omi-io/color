@@ -112,6 +112,18 @@ export const CONVERSION_EDGES: ReadonlyArray<ConversionEdge> = [
     },
     {
         from: "sRGB encoded",
+        to: "HWB",
+        operation: "rgbToHwb",
+        reversible: true,
+    },
+    {
+        from: "HWB",
+        to: "sRGB encoded",
+        operation: "hwbToRgb",
+        reversible: true,
+    },
+    {
+        from: "sRGB encoded",
         to: "CMYK",
         operation: "rgbToCmyk",
         reversible: true,
